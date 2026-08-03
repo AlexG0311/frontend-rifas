@@ -22,8 +22,14 @@ const ESTADO_CONFIG = {
   FINALIZADA: {
     label: "Finalizada",
     badge: "badge-error",
-    glow: "shadow-red-500/20",
+    glow: "shadow-red-500/20",  
     border: "border-red-500/30",
+  },
+    SORTEADA: {
+    label: "Sorteada",
+    badge: "badge-success",
+    glow: "shadow-green-500/20",
+    border: "border-green-500/30",
   },
 };
 
@@ -47,12 +53,20 @@ export default function RifaCard({ rifa }: RifaCardProps) {
     >
       {/* Imagen / Banner */}
       <div className="relative h-44 overflow-hidden bg-primary/10">
+        {rifa.imagenPrincipal ? (
+          <img
+            src={rifa.imagenPrincipal}
+            alt={rifa.titulo}
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+        ) : (
           <div className="flex h-full w-full items-center justify-center">
             <Ticket
               size={64}
               className="text-primary/40 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12"
             />
           </div>
+        )}
 
         {/* Badge estado */}
         <div className="absolute top-3 right-3">

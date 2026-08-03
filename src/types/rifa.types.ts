@@ -4,6 +4,7 @@ export interface Rifa {
   titulo: string;
   descripcion: string;
   precioNumero: number;
+  imagenPrincipal?: string,
   numeroInicial: number;
   numeroFinal: number;
   fechaInicio: string;
