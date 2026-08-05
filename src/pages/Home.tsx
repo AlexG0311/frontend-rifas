@@ -1,103 +1,53 @@
-import { useRifas } from "../hooks/useRifas";
-import RifaCard from "../components/RifaCard";
-import { Ticket, Loader2, AlertCircle, RefreshCw, Sparkles } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function Home() {
-  const { rifas, loading, error } = useRifas();
-
   return (
-    <div className="min-h-screen bg-base-100">
-      {/* Hero Header */}
-      <header className="bg-primary py-16 px-6">
-        <div className="max-w-5xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-primary-content/10 border border-primary-content/20 rounded-full px-4 py-1.5 text-sm text-primary-content/80 font-medium mb-6">
-            <Sparkles size={14} className="text-primary-content/60" />
-            Rifas exclusivas disponibles
+    <div className="min-h-screen bg-base-100 flex flex-col">
+
+      {/* Hero con imagen de fondo */}
+      <header className="relative h-[70vh] md:h-[75vh] flex items-center justify-center overflow-hidden">
+        {/* Fondo: cambia la URL por tu imagen en public/images/hero.jpg */}
+        <div
+          className="absolute inset-0 bg-center bg-cover"
+          style={{ backgroundImage: "url('/images/hero/portada.jpg')" }}
+          aria-hidden
+        />
+        <div className="absolute inset-0 bg-black/45" aria-hidden />
+
+        <div className="relative z-10 text-center px-6">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-3">Participa, gana, celebra</h1>
+          <p className="text-lg text-white/85 max-w-2xl mx-auto">La forma más emocionante de apoyar y ganar. Explora nuestras rifas y participa hoy.</p>
+          <div className="mt-6">
+            <Link to="/rifas" className="inline-block bg-white text-black rounded-full px-6 py-2 font-semibold shadow">Ver rifas</Link>
           </div>
-          <h1 className="text-5xl sm:text-6xl font-extrabold text-primary-content mb-5 leading-tight tracking-tight">
-            Monterroza
-            <span className="block text-primary-content/80">
-              Rifas
-            </span>
-          </h1>
-          <p className="text-primary-content/70 text-lg max-w-xl mx-auto leading-relaxed">
-            Elige tu rifa favorita, selecciona tus números de la suerte y participa por increíbles premios.
-          </p>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+      {/* Sección Nosotros */}
+      <section id="nosotros" className="py-16 px-6 max-w-4xl mx-auto text-center">
+        <h2 className="text-2xl font-bold mb-3">Sobre nosotros</h2>
+        <p className="text-base text-base-content/70 max-w-3xl mx-auto">Somos una comunidad que organiza rifas transparentes y con propósito. Cada participación apoya iniciativas locales y te da la oportunidad de ganar grandes premios.</p>
+      </section>
 
-        {/* Loading */}
-        {loading && (
-          <div className="flex flex-col items-center justify-center py-32 gap-5">
-            <div className="relative">
-              <Loader2 size={56} className="text-primary animate-spin" />
-              <div className="absolute inset-0 blur-xl bg-primary/30 rounded-full" />
-            </div>
-            <p className="text-base-content/50 text-lg">Cargando rifas disponibles...</p>
+      {/* Footer con contacto y redes */}
+      <footer id="contacto" className="mt-auto bg-base-200 border-t border-base-300 py-8">
+        <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div>
+            <h3 className="font-bold text-lg">Contáctanos</h3>
+            <p className="text-sm text-base-content/70">hola@ejemplo.com · +56 9 1234 5678</p>
           </div>
-        )}
 
-        {/* Error */}
-        {!loading && error && (
-          <div className="flex flex-col items-center justify-center py-32 gap-5 text-center">
-            <div className="bg-error/10 border border-error/30 rounded-3xl p-8 flex flex-col items-center gap-4 max-w-md">
-              <AlertCircle size={48} className="text-error" />
-              <div>
-                <p className="text-xl font-bold text-base-content mb-1">Error al cargar las rifas</p>
-                <p className="text-base-content/50 text-sm">{error}</p>
-              </div>
-              <button
-                onClick={() => window.location.reload()}
-                className="btn btn-error btn-outline btn-sm gap-2 mt-2"
-              >
-                <RefreshCw size={14} />
-                Reintentar
-              </button>
+          <div className="text-center md:text-right">
+            <p className="font-medium mb-2">Síguenos</p>
+            <div className="flex items-center gap-3 justify-center md:justify-end">
+              <a href="#" className="text-base-content/70 hover:text-base-content">Twitter</a>
+              <a href="#" className="text-base-content/70 hover:text-base-content">Instagram</a>
+              <a href="#" className="text-base-content/70 hover:text-base-content">Facebook</a>
             </div>
           </div>
-        )}
+        </div>
+      </footer>
 
-        {/* Sin rifas */}
-        {!loading && !error && rifas.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-32 gap-4 text-center">
-            <div className="bg-base-200 border border-base-300 rounded-3xl p-10 flex flex-col items-center gap-4 max-w-sm">
-              <Ticket size={52} className="text-base-content/20" />
-              <div>
-                <p className="text-xl font-bold text-base-content/50 mb-1">No hay rifas activas</p>
-                <p className="text-base-content/30 text-sm">Vuelve pronto para ver las próximas rifas</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Grid de rifas */}
-        {!loading && !error && rifas.length > 0 && (
-          <>
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h2 className="text-2xl font-extrabold text-base-content">
-                  Rifas activas
-                </h2>
-                <p className="text-base-content/50 text-sm mt-1">
-                  {rifas.length} rifa{rifas.length !== 1 ? "s" : ""} disponible{rifas.length !== 1 ? "s" : ""}
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {rifas.map((rifa) => (
-                <RifaCard
-                  key={rifa.uuidPublico}
-                  rifa={rifa}
-                />
-              ))}
-            </div>
-          </>
-        )}
-      </main>
     </div>
   );
 }

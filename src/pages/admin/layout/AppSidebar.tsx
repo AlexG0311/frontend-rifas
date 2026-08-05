@@ -12,7 +12,6 @@ import {
   PageIcon,
   PieChartIcon,
   PlugInIcon,
-  TableIcon,
   UserCircleIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
@@ -53,18 +52,16 @@ const navItems: NavItem[] = [
   },
   {
     icon: <BoxCubeIcon />,
-    name: "Employees",
+    name: "Ganadores",
     subItems: [
-      { name: "Employee List", path: "/employees", pro: false },
-      { name: "Add Employee", path: "/add-employee", pro: false },
+      { name: "Lista de Ganadores", path: "/admin/Ganadores", pro: false },
     ],
   },
   {
     icon: <BoxCubeIcon />,
-    name: "Clients",
+    name: "Clientes",
     subItems: [
-      { name: "Client List", path: "/clients", pro: false },
-      { name: "Add Client", path: "/add-client", pro: false },
+      { name: "Lista de Clientes", path: "/admin/clients", pro: false },
     ],
   },
   {
@@ -81,11 +78,6 @@ const navItems: NavItem[] = [
     name: "Forms",
     icon: <ListIcon />,
     subItems: [{ name: "Form Elements", path: "/admin/form-elements", pro: false }],
-  },
-  {
-    name: "Tables",
-    icon: <TableIcon />,
-    subItems: [{ name: "Basic Tables", path: "/admin/basic-tables", pro: false }],
   },
   {
     name: "Pages",

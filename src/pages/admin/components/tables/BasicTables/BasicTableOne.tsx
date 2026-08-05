@@ -1,115 +1,68 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from "../../ui/table";
-
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../ui/table";
 import Badge from "../../ui/badge/Badge";
+import { useGanadoresSorteo } from "../../../hooks/useGanadores";
+import { formatFechaCol } from "../../../utils/date.utils";
+import type { GanadorRifa } from "../../../types/ganador.type";
 
-interface Order {
-  id: number;
-  user: {
-    image: string;
-    name: string;
-    role: string;
-  };
-  projectName: string;
-  team: {
-    images: string[];
-  };
-  status: string;
-  budget: string;
-}
+const ESTADO_ENTREGA_CONFIG: Record<GanadorRifa["estadoEntrega"]["nombre"], { label: string; color: "warning" | "info" | "success" | "error" | "dark" }> = {
+  PENDIENTE: {
+    label: "Pendiente",
+    color: "warning",
+  },
+  CONTACTADO: {
+    label: "Contactado",
+    color: "info",
+  },
+  ENTREGADO: {
+    label: "Entregado",
+    color: "success",
+  },
+  NO_RECLAMADO: {
+    label: "No reclamado",
+    color: "error",
+  },
+  CANCELADO: {
+    label: "Cancelado",
+    color: "dark",
+  },
+};
 
-// Define the table data using the interface
-const tableData: Order[] = [
-  {
-    id: 1,
-    user: {
-      image: "/images/user/user-17.jpg",
-      name: "Lindsey Curtis",
-      role: "Web Designer",
-    },
-    projectName: "Agency Website",
-    team: {
-      images: [
-        "/images/user/user-22.jpg",
-        "/images/user/user-23.jpg",
-        "/images/user/user-24.jpg",
-      ],
-    },
-    budget: "3.9K",
-    status: "Active",
-  },
-  {
-    id: 2,
-    user: {
-      image: "/images/user/user-18.jpg",
-      name: "Kaiya George",
-      role: "Project Manager",
-    },
-    projectName: "Technology",
-    team: {
-      images: ["/images/user/user-25.jpg", "/images/user/user-26.jpg"],
-    },
-    budget: "24.9K",
-    status: "Pending",
-  },
-  {
-    id: 3,
-    user: {
-      image: "/images/user/user-17.jpg",
-      name: "Zain Geidt",
-      role: "Content Writing",
-    },
-    projectName: "Blog Writing",
-    team: {
-      images: ["/images/user/user-27.jpg"],
-    },
-    budget: "12.7K",
-    status: "Active",
-  },
-  {
-    id: 4,
-    user: {
-      image: "/images/user/user-20.jpg",
-      name: "Abram Schleifer",
-      role: "Digital Marketer",
-    },
-    projectName: "Social Media",
-    team: {
-      images: [
-        "/images/user/user-28.jpg",
-        "/images/user/user-29.jpg",
-        "/images/user/user-30.jpg",
-      ],
-    },
-    budget: "2.8K",
-    status: "Cancel",
-  },
-  {
-    id: 5,
-    user: {
-      image: "/images/user/user-21.jpg",
-      name: "Carla George",
-      role: "Front-end Developer",
-    },
-    projectName: "Website",
-    team: {
-      images: [
-        "/images/user/user-31.jpg",
-        "/images/user/user-32.jpg",
-        "/images/user/user-33.jpg",
-      ],
-    },
-    budget: "4.5K",
-    status: "Active",
-  },
-];
+export default function GanadoresTable() {
+  const { ganadores, isLoading, error, loadGanadores } = useGanadoresSorteo();
 
-export default function BasicTableOne() {
+  // Estado de carga
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-10">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Estado de error
+  if (error) {
+    return (
+      <div className="text-center py-10 text-red-600">
+        <p>Error al cargar ganadores: {error}</p>
+        <button 
+          onClick={loadGanadores}
+          className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Reintentar
+        </button>
+      </div>
+    );
+  }
+
+  // Sin datos
+  if (ganadores.length === 0) {
+    return (
+      <div className="text-center py-10 text-gray-500">
+        <p>No hay ganadores registrados</p>
+      </div>
+    );
+  }
+
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
       <div className="max-w-full overflow-x-auto">
@@ -121,96 +74,123 @@ export default function BasicTableOne() {
                 isHeader
                 className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                User
+                Ganador
               </TableCell>
               <TableCell
                 isHeader
                 className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                Project Name
+                Rifa
               </TableCell>
               <TableCell
                 isHeader
                 className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                Team
+                Número
               </TableCell>
               <TableCell
                 isHeader
                 className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                Status
+                Contacto
               </TableCell>
               <TableCell
                 isHeader
                 className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                Budget
+                Estado
+              </TableCell>
+              <TableCell
+                isHeader
+                className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+              >
+                Fecha Confirmación
               </TableCell>
             </TableRow>
           </TableHeader>
 
           {/* Table Body */}
           <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-            {tableData.map((order) => (
-              <TableRow key={order.id}>
+            {ganadores.map((ganador) => (
+              <TableRow key={ganador.idGanador}>
+                {/* Columna: Ganador */}
                 <TableCell className="px-5 py-4 sm:px-6 text-start">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 overflow-hidden rounded-full">
-                      <img
-                        width={40}
-                        height={40}
-                        src={order.user.image}
-                        alt={order.user.name}
-                      />
+                    <div className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 font-semibold">
+                      {ganador.cliente.nombre.charAt(0)}
+                      {ganador.cliente.apellido?.charAt(0) || ''}
                     </div>
                     <div>
                       <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                        {order.user.name}
+                        {`${ganador.cliente.nombre} ${ganador.cliente.apellido || ''}`}
                       </span>
                       <span className="block text-gray-500 text-theme-xs dark:text-gray-400">
-                        {order.user.role}
+                        ID: {ganador.cliente.uuidPublico}
                       </span>
                     </div>
                   </div>
                 </TableCell>
+
+                {/* Columna: Rifa */}
                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                  {order.projectName}
-                </TableCell>
-                <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                  <div className="flex -space-x-2">
-                    {order.team.images.map((teamImage, index) => (
-                      <div
-                        key={index}
-                        className="w-6 h-6 overflow-hidden border-2 border-white rounded-full dark:border-gray-900"
-                      >
-                        <img
-                          width={24}
-                          height={24}
-                          src={teamImage}
-                          alt={`Team member ${index + 1}`}
-                          className="w-full size-6"
-                        />
-                      </div>
-                    ))}
+                  <div>
+                    <span className="block font-medium text-gray-800 dark:text-white/90">
+                      {ganador.rifa.titulo}
+                    </span>
+                    <span className="block text-gray-500 text-theme-xs dark:text-gray-400">
+                      UUID: {ganador.rifa.uuidPublico.substring(0, 8)}...
+                    </span>
                   </div>
                 </TableCell>
+
+                {/* Columna: Número */}
+                <TableCell className="px-4 py-3 text-start">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-50 text-green-700 text-sm font-medium dark:bg-green-500/10 dark:text-green-400">
+                    #{ganador.numero}
+                  </span>
+                </TableCell>
+
+                {/* Columna: Contacto */}
                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      <span>{ganador.cliente.correo}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                      <span>{ganador.cliente.telefono}</span>
+                    </div>
+                  </div>
+                </TableCell>
+
+                {/* Columna: Estado */}
+                <TableCell className="px-4 py-3 text-start">
+                  {(() => {
+                    const estado = ESTADO_ENTREGA_CONFIG[ganador.estadoEntrega.nombre] ?? ESTADO_ENTREGA_CONFIG.PENDIENTE;
+
+                    return (
                   <Badge
                     size="sm"
-                    color={
-                      order.status === "Active"
-                        ? "success"
-                        : order.status === "Pending"
-                        ? "warning"
-                        : "error"
-                    }
+                        color={estado.color}
                   >
-                    {order.status}
+                        {estado.label}
                   </Badge>
+                    );
+                  })()}
                 </TableCell>
+
+                {/* Columna: Fecha Confirmación */}
                 <TableCell className="px-4 py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                  {order.budget}
+                  {ganador.fechaConfirmacion ? (
+                    formatFechaCol(ganador.fechaConfirmacion)
+                  ) : (
+                    <span className="text-gray-400">Pendiente</span>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
