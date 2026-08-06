@@ -167,12 +167,12 @@ export default function GanadoresTable() {
                     </div>
                   </div>
                 </TableCell>
-
+                
                 {/* Columna: Estado */}
-                <TableCell className="px-4 py-3 text-start">
-                  {(() => {
+                <TableCell   className="px-4 py-3 text-start">
+            
+                   {(() => {                    
                     const estado = ESTADO_ENTREGA_CONFIG[ganador.estadoEntrega.nombre] ?? ESTADO_ENTREGA_CONFIG.PENDIENTE;
-
                     return (
                   <Badge
                     size="sm"
@@ -182,6 +182,7 @@ export default function GanadoresTable() {
                   </Badge>
                     );
                   })()}
+                                 
                 </TableCell>
 
                 {/* Columna: Fecha Confirmación */}
@@ -196,7 +197,7 @@ export default function GanadoresTable() {
             ))}
           </TableBody>
         </Table>
-      </div>
+      </div>    
     </div>
   );
 }

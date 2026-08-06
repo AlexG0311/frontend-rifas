@@ -220,9 +220,9 @@ export default function ResultadosRifas() {
         <RifaSelector
           rifas={rifas}
           rifasLoading={rifasLoading}
-          selectedRifaUuid={selectedRifaUuid}
-          selectedRifa={selectedRifa}
-          onSelectRifa={handleSelectRifa}
+          selectedRifaUuid={selectedRifaUuid} // obtenemo la id de la rifa
+          selectedRifa={selectedRifa} // traemos la rifa seleccionada
+          onSelectRifa={handleSelectRifa} // cambia el valor dependiendo la seleccion de la rifa
         />
 
         {selectedRifaUuid && (

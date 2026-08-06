@@ -1,8 +1,8 @@
-import React from 'react';
 import type { ActualizarEntregaResponse, EstadoEntrega, GanadorPublicoResponse } from '../../../types/resultado.type';
 import type { EntregaFormData } from './resultadosRifas.types';
 import { ESTADOS_ENTREGA } from './resultadosRifas.types';
 import { SectionHeader } from './SectionHeader';
+import { useRef } from 'react';
 
 interface EntregaCardProps {
   ganadorPublico: GanadorPublicoResponse | null;
@@ -23,10 +23,15 @@ export const EntregaCard: React.FC<EntregaCardProps> = ({
   entregaLoading,
   entregaResult,
 }) => {
-  if (!ganadorPublico) return null;
 
+  const refDialog = useRef<HTMLDialogElement>(null);
+
+  if (!ganadorPublico) return null;
+  
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-lg overflow-hidden mb-6">
+
+    <dialog ref={refDialog} >
+        <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-lg overflow-hidden mb-6">
       <div className="p-6 sm:p-8">
         <SectionHeader step={5} title="Gestión de Entrega" />
 
@@ -130,5 +135,7 @@ export const EntregaCard: React.FC<EntregaCardProps> = ({
         )}
       </div>
     </div>
+    </dialog>
+    
   );
 };

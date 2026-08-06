@@ -30,9 +30,11 @@ export const RifaSelector: React.FC<RifaSelectorProps> = ({
           {rifasLoading ? 'Cargando rifas...' : 'Seleccione una rifa'}
         </option>
         {rifas.map((rifa) => (
+          
           <option key={rifa.uuidPublico} value={rifa.uuidPublico}>
             {rifa.titulo} — {rifa.estado.nombre} ({rifa.loteria.nombre})
           </option>
+
         ))}
       </select>
 

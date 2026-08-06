@@ -6,6 +6,7 @@ import type { ProcesarResultadoPayload } from '../../types/resultado.type';
 interface FormData {
   idLoteria: number;
   fechaSorteo: string;
+  
   numeroGanador: string;
   serie: string;
 }
