@@ -12,12 +12,15 @@ import {
   Trophy,
   Calendar,
   Hash,
+  Shuffle,
+  RefreshCw,
 } from "lucide-react";
 import { useNumerosRifa } from "../hooks/useNumerosRifa";
 import { useRifas } from "../hooks/useRifas";
 import type { EnviarParaApartar, NumerosReservado } from "../types/reserva.types";
 import { ReservarNumero, CancelarReserva, ObtenerReservaPorToken } from "../services/reserva.service";
 import CheckoutModal from "../components/CheckoutModal";
+import { useResultadoRifa } from "./admin/pages/Resultados/hooks/useResultados";
 
 const ESTADO_NUM_CONFIG = {
   DISPONIBLE: {
@@ -38,19 +41,29 @@ const ESTADO_NUM_CONFIG = {
   },
 } as const;
 
+// Combos disponibles cuando la rifa tiene más de 100 números
+const COMBOS = [
+  { cantidad: 1, label: "1 número", descripcion: "Un número al azar" },
+  { cantidad: 5, label: "Combo x5", descripcion: "5 números aleatorios" },
+  { cantidad: 10, label: "Combo x10", descripcion: "10 números aleatorios" },
+  { cantidad: 20, label: "Combo x20", descripcion: "20 números aleatorios" },
+];
+
 export default function RifaPage() {
   const { uuid } = useParams<{ uuid: string }>();
+
   const navigate = useNavigate();
 
   const { rifas, loading: loadingRifas } = useRifas();
   const { numeros, loading: loadingNumeros, error } = useNumerosRifa(uuid ?? null);
-
+  const { resultado, isLoading } = useResultadoRifa(uuid ?? null);
   const [seleccionados, setSeleccionados] = useState<number[]>([]);
   const [enviando, setEnviando] = useState(false);
   const [checkoutCompletado, setCheckoutCompletado] = useState(false);
   const [exitoso, setExitoso] = useState(false);
   const [reservaActual, setReservaActual] = useState<NumerosReservado | null>(null);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [comboSinStock, setComboSinStock] = useState<number | null>(null);
 
   const rifa = rifas.find((r) => r.uuidPublico === uuid);
 
@@ -63,6 +76,10 @@ export default function RifaPage() {
   const total = numeros.length || rifaTotal || 0;
   const porcentajeVendido = total > 0 ? Math.round(((vendidos + reservados) / total) * 100) : 0;
 
+  // A partir de 100 números, se vende por combos aleatorios en vez de grilla navegable
+  const esGrillaChica = total <= 100;
+  const cifras = String(Math.max(total - 1, 0)).length; // padding dinámico: 2 cifras si total<=100, 3 si <=1000, etc.
+
   function toggleNumero(numero: number) {
     setSeleccionados((prev) =>
       prev.includes(numero) ? prev.filter((n) => n !== numero) : [...prev, numero]
@@ -73,85 +90,94 @@ export default function RifaPage() {
     setSeleccionados((prev) => prev.filter((n) => n !== numero));
   }
 
+  function seleccionarCombo(cantidad: number) {
+    const numerosDisponibles = numeros.filter((n) => n.estado === "DISPONIBLE");
+
+    if (numerosDisponibles.length < cantidad) {
+      setComboSinStock(cantidad);
+      return;
+    }
+    setComboSinStock(null);
+
+    // Fisher-Yates shuffle parcial
+    const shuffled = [...numerosDisponibles];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    const elegidos = shuffled.slice(0, cantidad).map((n) => n.numero);
+    setSeleccionados(elegidos);
+  }
+
   const canceladaRef = useRef(false);
   async function handleContinuarPago({ uuidRifa, numeros }: EnviarParaApartar) {
     setEnviando(true);
     canceladaRef.current = false;
     try {
       const res = await ReservarNumero(uuidRifa, numeros);
-      setReservaActual(res);  
+      setReservaActual(res);
       localStorage.setItem("reservaActual", JSON.stringify(res));
-      setCheckoutCompletado(false);  
+      setCheckoutCompletado(false);
       setIsCheckoutOpen(true);
-      console.log(res)
     } catch (error) {
       console.error(error);
-      alert("Error al apartar los números.");
+      alert("Error al apartar los números. Es posible que alguno ya no esté disponible, intenta de nuevo.");
+      setSeleccionados([]);
     } finally {
       setEnviando(false);
     }
   }
 
-const handleCloseCheckout = async () => {
-  if (!reservaActual || checkoutCompletado || canceladaRef.current) {
-    setIsCheckoutOpen(false);
-    return;
-  }
-  canceladaRef.current = true;
-  try {
-    await CancelarReserva(reservaActual.uuidPublico, reservaActual.sessionToken);
-  } catch (error) {
-    console.error(error);
-  } finally {
-     setSeleccionados([]);
-    setReservaActual(null);
-    localStorage.removeItem("reservaActual");
-    setIsCheckoutOpen(false);
-}
-}
-
-
-
-useEffect(() => {
-  if (reservaActual || checkoutCompletado) return;
- 
-  const localStorageReserva = localStorage.getItem("reservaActual");
-  if (!localStorageReserva) return;
- 
-  (async () => {
-    let reserva: NumerosReservado;
-    try {
-      reserva = JSON.parse(localStorageReserva);
-    } catch {
-      localStorage.removeItem("reservaActual");
+  const handleCloseCheckout = async () => {
+    if (!reservaActual || checkoutCompletado || canceladaRef.current) {
+      setIsCheckoutOpen(false);
       return;
     }
- 
-    // Verifica contra el backend que la reserva sigue viva ANTES de
-    // mostrar nada — evita reabrir el modal para una reserva que ya
-    // expiró hace rato.
+    canceladaRef.current = true;
     try {
-      const actual = await ObtenerReservaPorToken(reserva.sessionToken); // GET /reservas/session/:sessionToken
- 
-      if (!actual || actual.estado?.nombre !== "ACTIVA") {  // si la reserva esta cancelada , aceptada, expirada, etc borrar 
-                                                            // del localStorage y no abrir el modal
+      await CancelarReserva(reservaActual.uuidPublico, reservaActual.sessionToken);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setSeleccionados([]);
+      setReservaActual(null);
+      localStorage.removeItem("reservaActual");
+      setIsCheckoutOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    if (reservaActual || checkoutCompletado) return;
+
+    const localStorageReserva = localStorage.getItem("reservaActual");
+    if (!localStorageReserva) return;
+
+    (async () => {
+      let reserva: NumerosReservado;
+      try {
+        reserva = JSON.parse(localStorageReserva);
+      } catch {
         localStorage.removeItem("reservaActual");
         return;
       }
- 
-      setReservaActual(actual);
-      setSeleccionados(actual.numeros.map((n: string) => parseInt(n, 10)));
-      setIsCheckoutOpen(true);
-    } catch {
-      // Si el endpoint falla o la reserva ya no existe, simplemente se
-      // descarta en silencio — no interrumpimos al usuario con un
-      // alert por algo que ya no es válido.
-      localStorage.removeItem("reservaActual");
-    }
-  })();
-}, [reservaActual, checkoutCompletado]);
 
+      try {
+        const actual = await ObtenerReservaPorToken(reserva.sessionToken);
 
+        if (!actual || actual.estado?.nombre !== "ACTIVA") {
+          localStorage.removeItem("reservaActual");
+          return;
+        }
+
+        setReservaActual(actual);
+        setSeleccionados(actual.numeros.map((n: string) => parseInt(n, 10)));
+        setIsCheckoutOpen(true);
+      } catch {
+        localStorage.removeItem("reservaActual");
+      }
+    })();
+  }, [reservaActual, checkoutCompletado]);
 
   const totalPrecio = seleccionados.length * (rifa?.precioNumero ?? 0);
 
@@ -177,8 +203,102 @@ useEffect(() => {
         <div className="text-center flex flex-col items-center gap-5 p-8">
           <AlertCircle size={52} className="text-error" />
           <p className="text-xl font-bold">{error ?? "Rifa no encontrada"}</p>
-          <button onClick={() => navigate("/home")} className="btn btn-primary gap-2">
-            <ArrowLeft size={16} /> Volver al inicio
+          <button onClick={() => navigate("/rifas")} className="btn btn-primary gap-2">
+            <ArrowLeft size={16} /> Volver a Rifas
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Rifa finalizada (ventas cerradas, aún no se sortea) ─────────────────────
+  if (rifa.estado?.nombre === "FINALIZADA") {
+    return (
+      <div className="min-h-screen bg-base-100 flex items-center justify-center">
+        <div className="text-center flex flex-col items-center gap-6 p-8 max-w-md">
+          <div className="w-20 h-20 rounded-full bg-warning/20 border-2 border-warning flex items-center justify-center">
+            <Ticket size={40} className="text-warning" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-extrabold text-base-content mb-2">Ventas finalizadas</h2>
+            <p className="text-base-content/50 text-sm leading-relaxed">
+              Esta rifa ya no está disponible para la compra de números.
+              {rifa.fechaSorteo && (
+                <>
+                  {" "}
+                  Espera los resultados el{" "}
+                  <span className="font-semibold text-base-content/70">
+                    {new Date(rifa.fechaSorteo).toLocaleDateString("es-ES", {
+                      day: "2-digit",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </span>
+                  .
+                </>
+              )}
+            </p>
+          </div>
+          <button onClick={() => navigate("/rifas")} className="btn btn-primary w-full gap-2">
+            <ArrowLeft size={16} /> Volver a Rifas
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Rifa sorteada (ya hay número ganador) ────────────────────────────────────
+  if (rifa.estado?.nombre === "SORTEADA") {
+    return (
+      <div className="min-h-screen bg-base-100 flex items-center justify-center">
+        <div className="text-center flex flex-col items-center gap-6 p-8 max-w-md">
+          <div className="w-20 h-20 rounded-full bg-success/20 border-2 border-success flex items-center justify-center">
+            <Trophy size={40} className="text-success" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-extrabold text-base-content mb-2">¡Ya hay ganador!</h2>
+            <p className="text-base-content/50 text-sm mb-4">{rifa.titulo}</p>
+
+            {isLoading ? (
+              <div className="flex justify-center py-4">
+                <Loader2 size={28} className="text-success animate-spin" />
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <div className="inline-flex flex-col items-center gap-1 bg-success/10 border border-success/30 rounded-2xl px-8 py-5">
+                  <span className="text-xs uppercase tracking-widest text-success/60 font-semibold">
+                    Número ganador (Rifa)
+                  </span>
+                  <span className="text-4xl font-extrabold text-success">
+                    {resultado?.numeroGanador
+                      ? String(resultado.numeroGanador).padStart(2, "0")
+                      : "—"}
+                  </span>
+                </div>
+
+                <div className="inline-flex flex-col items-center gap-1 bg-info/10 border border-info/30 rounded-2xl px-8 py-5">
+                  <span className="text-xs uppercase tracking-widest text-info/60 font-semibold">
+                    Resultado lotería
+                  </span>
+                  <span className="text-4xl font-extrabold text-info">
+                    {resultado?.loteria?.numeroGanador
+                      ? String(resultado.loteria.numeroGanador).padStart(2, "0")
+                      : "—"}
+                  </span>
+                  {resultado?.loteria?.serie && (
+                    <span className="text-xs text-info/50 font-medium mt-0.5">
+                      Serie: {resultado.loteria.serie}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          <p className="text-base-content/40 text-xs leading-relaxed">
+            Si eres el ganador, estaremos contactándote para la entrega del premio.
+          </p>
+          <button onClick={() => navigate("/rifas")} className="btn btn-primary w-full gap-2">
+            <ArrowLeft size={16} /> Volver a Rifas
           </button>
         </div>
       </div>
@@ -202,7 +322,7 @@ useEffect(() => {
           <div className="flex flex-wrap gap-2 justify-center">
             {seleccionados.map((n) => (
               <span key={n} className="badge badge-success badge-lg font-bold">
-                {String(n).padStart(2, "0")}
+                {String(n).padStart(cifras, "0")}
               </span>
             ))}
           </div>
@@ -217,11 +337,9 @@ useEffect(() => {
   // ─── Vista principal ──────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-base-100">
-
       {/* ── Header Hero ─────────────────────────────────────────────────────────── */}
       <header className="bg-primary">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-8">
-          {/* Back button */}
           <button
             onClick={() => navigate("/home")}
             className="inline-flex items-center gap-2 text-primary-content/70 hover:text-primary-content transition-colors text-sm font-medium mb-6 group"
@@ -246,7 +364,6 @@ useEffect(() => {
               )}
             </div>
 
-            {/* Info pills */}
             <div className="flex flex-wrap gap-2 sm:flex-col sm:items-end">
               <div className="bg-primary-content/10 border border-primary-content/20 rounded-xl px-3 py-2 text-center">
                 <p className="text-primary-content/50 text-xs uppercase tracking-widest">Precio / número</p>
@@ -294,62 +411,132 @@ useEffect(() => {
 
       {/* ── Layout principal (números + carrito) ─────────────────────────────────── */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex flex-col lg:flex-row gap-8">
-
-        {/* ── Panel de números ─────────────────────────────────────────────────────── */}
+        {/* ── Panel de números / combos ─────────────────────────────────────────────── */}
         <section className="flex-1 min-w-0">
-          {/* Leyenda */}
-          <div className="flex flex-wrap gap-4 mb-5 text-xs">
-            <LeyendaItem color="bg-base-300 border-base-content/10" label="Disponible" />
-            <LeyendaItem color="bg-primary border-primary" label="Seleccionado" />
-            <LeyendaItem color="bg-warning/10 border-warning/50" label="Reservado" />
-            <LeyendaItem color="bg-error/10 border-error/30" label="Vendido" />
-          </div>
+          {esGrillaChica ? (
+            <>
+              {/* Leyenda */}
+              <div className="flex flex-wrap gap-4 mb-5 text-xs">
+                <LeyendaItem color="bg-base-300 border-base-content/10" label="Disponible" />
+                <LeyendaItem color="bg-primary border-primary" label="Seleccionado" />
+                <LeyendaItem color="bg-warning/10 border-warning/50" label="Reservado" />
+                <LeyendaItem color="bg-error/10 border-error/30" label="Vendido" />
+              </div>
 
-          {/* Grid de números */}
-          {numeros.length > 0 && (
-            <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2">
-              {numeros.map((num) => {
-                const isSeleccionado = seleccionados.includes(num.numero) && num.estado === "DISPONIBLE";
-                const cfg = isSeleccionado
-                  ? ESTADO_NUM_CONFIG["SELECCIONADO"]
-                  : ESTADO_NUM_CONFIG[num.estado];
-                const isDisabled = num.estado !== "DISPONIBLE";
+              {/* Grid de números */}
+              {numeros.length > 0 && (
+                <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2">
+                  {numeros.map((num) => {
+                    const isSeleccionado = seleccionados.includes(num.numero) && num.estado === "DISPONIBLE";
+                    const cfg = isSeleccionado
+                      ? ESTADO_NUM_CONFIG["SELECCIONADO"]
+                      : ESTADO_NUM_CONFIG[num.estado];
+                    const isDisabled = num.estado !== "DISPONIBLE";
 
-                return (
+                    return (
+                      <button
+                        key={num.numero}
+                        onClick={() => !isDisabled && toggleNumero(num.numero)}
+                        disabled={isDisabled}
+                        title={cfg.label}
+                        className={`
+                          flex items-center justify-center rounded-xl
+                          text-xs font-bold h-10 w-full
+                          transition-all duration-150 select-none border
+                          ${cfg.base}
+                        `}
+                      >
+                        {String(num.numero).padStart(cifras, "0")}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {numeros.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-24 gap-3 text-base-content/30">
+                  <Ticket size={44} />
+                  <p className="text-sm">No hay números registrados</p>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              {/* ── Modo combos (más de 100 números) ────────────────────────────────── */}
+              <div className="mb-6">
+                <h3 className="text-lg font-bold text-base-content mb-1">Elige tu combo</h3>
+                <p className="text-sm text-base-content/50">
+                  Con {total} números en juego, te asignamos combinaciones al azar entre los números disponibles.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {COMBOS.map((combo) => (
                   <button
-                    key={num.numero}
-                    onClick={() => !isDisabled && toggleNumero(num.numero)}
-                    disabled={isDisabled}
-                    title={cfg.label}
+                    key={combo.cantidad}
+                    onClick={() => seleccionarCombo(combo.cantidad)}
+                    disabled={disponibles < combo.cantidad}
                     className={`
-                      flex items-center justify-center rounded-xl
-                      text-xs font-bold h-10 w-full
-                      transition-all duration-150 select-none border
-                      ${cfg.base}
+                      flex flex-col items-center gap-2 rounded-2xl border-2 p-5 transition-all
+                      disabled:opacity-40 disabled:cursor-not-allowed
+                      ${combo.destacado
+                        ? "border-primary bg-primary/10 shadow-lg shadow-primary/20 hover:bg-primary/15"
+                        : "border-base-300 bg-base-200 hover:border-primary/50 hover:bg-base-300/50"}
                     `}
                   >
-                    {String(num.numero).padStart(2, "0")}
+                    {combo.destacado && (
+                      <span className="badge badge-primary badge-sm mb-1">Más popular</span>
+                    )}
+                    <Shuffle size={26} className="text-primary" />
+                    <span className="text-base font-extrabold text-base-content">{combo.label}</span>
+                    <span className="text-xs text-base-content/50 text-center leading-tight">
+                      {combo.descripcion}
+                    </span>
+                    <span className="text-primary font-bold mt-1">
+                      ${(combo.cantidad * (rifa.precioNumero ?? 0)).toLocaleString()}
+                    </span>
                   </button>
-                );
-              })}
-            </div>
-          )}
+                ))}
+              </div>
 
-          {numeros.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-24 gap-3 text-base-content/30">
-              <Ticket size={44} />
-              <p className="text-sm">No hay números registrados</p>
-            </div>
+              {comboSinStock !== null && (
+                <div className="mt-4 rounded-xl bg-error/10 border border-error/30 px-4 py-3 text-sm text-error">
+                  Solo quedan {disponibles} números disponibles — no alcanza para un combo de {comboSinStock}.
+                </div>
+              )}
+
+              {/* Números ya asignados (tras elegir un combo) */}
+              {seleccionados.length > 0 && (
+                <div className="mt-6 rounded-2xl bg-primary/5 border border-primary/20 p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-sm font-semibold text-base-content/70">
+                      Tus {seleccionados.length} número(s) asignado(s)
+                    </p>
+                    <button
+                      onClick={() => setSeleccionados([])}
+                      className="btn btn-ghost btn-xs gap-1 text-base-content/40 hover:text-error"
+                    >
+                      <RefreshCw size={12} /> Cambiar
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto pr-1">
+                    {seleccionados.map((n) => (
+                      <span key={n} className="badge badge-primary badge-md font-mono font-bold">
+                        {String(n).padStart(cifras, "0")}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </section>
 
         {/* ── Panel carrito (sticky en desktop) ────────────────────────────────────── */}
         <aside className="lg:w-80 shrink-0">
           <div className="lg:sticky lg:top-6 flex flex-col gap-4">
-
             {/* Card carrito */}
             <div className="bg-base-200 rounded-2xl border border-base-300 overflow-hidden">
-              {/* Header del carrito */}
               <div className="px-5 py-4 border-b border-base-300 flex items-center gap-2">
                 <ShoppingCart size={18} className="text-primary" />
                 <span className="font-bold text-base-content">Mi selección</span>
@@ -360,12 +547,15 @@ useEffect(() => {
                 )}
               </div>
 
-              {/* Lista de seleccionados */}
               <div className="px-5 py-4 min-h-[120px]">
                 {seleccionados.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-24 gap-2 text-base-content/30">
                     <Ticket size={28} />
-                    <p className="text-xs text-center">Haz clic en los números<br />para seleccionarlos</p>
+                    <p className="text-xs text-center">
+                      {esGrillaChica
+                        ? <>Haz clic en los números<br />para seleccionarlos</>
+                        : <>Elige un combo<br />para comenzar</>}
+                    </p>
                   </div>
                 ) : (
                   <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto pr-1">
@@ -375,21 +565,22 @@ useEffect(() => {
                         className="group flex items-center gap-1 bg-primary/15 border border-primary/30 rounded-lg px-2 py-1 transition-all hover:bg-error/15 hover:border-error/30"
                       >
                         <span className="text-sm font-bold text-primary group-hover:text-error transition-colors">
-                          {String(numero).padStart(2, "0")}
+                          {String(numero).padStart(cifras, "0")}
                         </span>
-                        <button
-                          onClick={() => quitarNumero(numero)}
-                          className="text-primary/50 group-hover:text-error transition-colors ml-0.5"
-                        >
-                          <X size={12} />
-                        </button>
+                        {esGrillaChica && (
+                          <button
+                            onClick={() => quitarNumero(numero)}
+                            className="text-primary/50 group-hover:text-error transition-colors ml-0.5"
+                          >
+                            <X size={12} />
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>
                 )}
               </div>
 
-              {/* Total y botón */}
               <div className="px-5 py-4 border-t border-base-300 bg-base-300/40">
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-sm text-base-content/60">Total a pagar</span>
@@ -428,7 +619,9 @@ useEffect(() => {
             <div className="bg-info/10 border border-info/20 rounded-2xl px-5 py-4 flex gap-3">
               <Zap size={18} className="text-info shrink-0 mt-0.5" />
               <p className="text-xs text-base-content/60 leading-relaxed">
-                Los números seleccionados se reservan por tiempo limitado. Completa tu pago para asegurarlos.
+                {esGrillaChica
+                  ? "Los números seleccionados se reservan por tiempo limitado. Completa tu pago para asegurarlos."
+                  : "Los números de tu combo se reservan por tiempo limitado. Completa tu pago para asegurarlos."}
               </p>
             </div>
           </div>
@@ -465,11 +658,10 @@ useEffect(() => {
       )}
 
       {/* ── Modal Checkout ─────────────────────────────────────────────────── */}
-      
       <CheckoutModal
         isOpen={isCheckoutOpen}
         onClose={() => {
-          handleCloseCheckout()
+          handleCloseCheckout();
         }}
         reserva={reservaActual}
         totalPrecio={totalPrecio}
@@ -479,9 +671,8 @@ useEffect(() => {
           setExitoso(true);
           setReservaActual(null);
           localStorage.removeItem("reservaActual");
-          setCheckoutCompletado(true)
+          setCheckoutCompletado(true);
         }}
-
       />
     </div>
   );

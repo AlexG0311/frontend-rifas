@@ -75,6 +75,10 @@ export interface ActualizarEntregaResponse {
 /** GET /rifas/:uuid/ganador — response.data */
 export interface GanadorPublicoResponse {
   idGanador: number;
+  nombreRecibido: string | null;
+  telefonoConfirmado: string | null;
+  fechaConfirmacion: string | null;
+  observacion: string | null;
   numeroGanador: string;
   nombreCliente: string;
   estadoEntrega: {

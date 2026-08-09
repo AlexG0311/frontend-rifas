@@ -1,6 +1,7 @@
 import type { Rifa } from "../types/rifa.types";
-import { Calendar, Ticket, Trophy, TrendingUp } from "lucide-react";
+import { Calendar, Ticket, Trophy, TrendingUp, Clock} from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useNumerosRifa } from "../hooks/useNumerosRifa";
 
 interface RifaCardProps {
   rifa: Rifa;
@@ -22,10 +23,10 @@ const ESTADO_CONFIG = {
   FINALIZADA: {
     label: "Finalizada",
     badge: "badge-error",
-    glow: "shadow-red-500/20",  
+    glow: "shadow-red-500/20",
     border: "border-red-500/30",
   },
-    SORTEADA: {
+  SORTEADA: {
     label: "Sorteada",
     badge: "badge-success",
     glow: "shadow-green-500/20",
@@ -36,9 +37,13 @@ const ESTADO_CONFIG = {
 export default function RifaCard({ rifa }: RifaCardProps) {
   const navigate = useNavigate();
   const config = ESTADO_CONFIG[rifa.estado.nombre as keyof typeof ESTADO_CONFIG] ?? ESTADO_CONFIG.ACTIVA;
-  const vendidos = 0;
+  const { numeros } = useNumerosRifa(rifa.uuidPublico ?? null);
+  const vendidos = numeros.filter((n) => n.estado === "VENDIDO").length;
   const total = rifa.numeroFinal - rifa.numeroInicial + 1;
   const porcentaje = total > 0 ? Math.round((vendidos / total) * 100) : 0;
+
+  const esFinalizada = rifa.estado.nombre === "FINALIZADA";
+  const esSorteada = rifa.estado.nombre === "SORTEADA";
 
   return (
     <div
@@ -108,22 +113,24 @@ export default function RifaCard({ rifa }: RifaCardProps) {
           </div>
         )}
 
-        {/* Progreso de números */}
-        <div className="space-y-1">
-          <div className="flex items-center justify-between text-xs text-base-content/60">
-            <span className="flex items-center gap-1">
-              <TrendingUp size={12} />
-              {vendidos} / {total} números
-            </span>
-            <span className="font-semibold text-primary">{porcentaje}%</span>
+        {/* Progreso de números — solo si aún se pueden comprar */}
+        {!esFinalizada && !esSorteada && (
+          <div className="space-y-1">
+            <div className="flex items-center justify-between text-xs text-base-content/60">
+              <span className="flex items-center gap-1">
+                <TrendingUp size={12} />
+                {vendidos} / {total} números
+              </span>
+              <span className="font-semibold text-primary">{porcentaje}%</span>
+            </div>
+            <div className="h-1.5 w-full rounded-full bg-base-300 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-primary transition-all duration-700"
+                style={{ width: `${porcentaje}%` }}
+              />
+            </div>
           </div>
-          <div className="h-1.5 w-full rounded-full bg-base-300 overflow-hidden">
-            <div
-              className="h-full rounded-full bg-primary transition-all duration-700"
-              style={{ width: `${porcentaje}%` }}
-            />
-          </div>
-        </div>
+        )}
 
         {/* Footer: precio + botón */}
         <div className="flex items-center justify-between mt-1 pt-3 border-t border-base-300">
@@ -133,10 +140,26 @@ export default function RifaCard({ rifa }: RifaCardProps) {
               ${rifa.precioNumero ?? "—"}
             </p>
           </div>
-          <button className="btn btn-primary btn-sm rounded-xl gap-2 group-hover:btn-active transition-all">
-            <Ticket size={14} />
-            Ver números
-          </button>
+
+          {esSorteada ? (
+            <button className="btn btn-success btn-sm rounded-xl gap-2 group-hover:btn-active transition-all">
+              <Trophy size={14} />
+              Ver ganador
+            </button>
+          ) : esFinalizada ? (
+            <button
+              disabled
+              className="btn btn-disabled btn-sm rounded-xl gap-2 cursor-not-allowed"
+            >
+              <Clock size={14} />
+              Esperando sorteo
+            </button>
+          ) : (
+            <button className="btn btn-primary btn-sm rounded-xl gap-2 group-hover:btn-active transition-all">
+              <Ticket size={14} />
+              Ver números
+            </button>
+          )}
         </div>
       </div>
     </div>

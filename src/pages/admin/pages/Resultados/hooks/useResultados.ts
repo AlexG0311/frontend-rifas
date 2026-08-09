@@ -19,7 +19,7 @@ import type {
   GanadorPublicoResponse,
   ResultadoRifaResponse,
 } from '../../../types/resultado.type';
-
+import { ApiError } from '../../../services/resultado.service';
 // ─── Hook para procesar resultado de lotería (masivo) ───
 export const useProcesarResultadoLoteria = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -85,24 +85,32 @@ export const useRegistrarSorteoRifa = () => {
   return { registrar, resultado, isLoading, error, reset };
 };
 
+
+
 // ─── Hook para declarar ganador ───
 export const useDeclararGanador = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ganador, setGanador] = useState<DeclararGanadorResponse | null>(null);
+  const [sinGanador, setSinGanador] = useState(false);
 
   const declarar = async (
     uuidPublico: string
   ): Promise<DeclararGanadorResponse | null> => {
     setIsLoading(true);
     setError(null);
+    setSinGanador(false);
     try {
       const data = await declararGanador(uuidPublico);
       setGanador(data);
       return data;
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Error al declarar ganador');
-      console.error(error);
+      if (error instanceof ApiError && error.errorCode === 'NUMERO_SIN_COMPRADOR') {
+        setSinGanador(true);
+      } else {
+        setError(error instanceof Error ? error.message : 'Error al declarar ganador');
+        console.error(error);
+      }
       return null;
     } finally {
       setIsLoading(false);
@@ -112,9 +120,10 @@ export const useDeclararGanador = () => {
   const reset = useCallback(() => {
     setGanador(null);
     setError(null);
+    setSinGanador(false);
   }, []);
 
-  return { declarar, ganador, isLoading, error, reset };
+  return { declarar, ganador, isLoading, error, sinGanador, reset };
 };
 
 // ─── Hook para actualizar estado de entrega ───
@@ -165,8 +174,12 @@ export const useGanadorRifa = (uuidPublico: string) => {
       const data = await getGanadorRifa(uuidPublico);
       setGanador(data);
     } catch (error) {
-      // 404 = no hay ganador aún, no es un error crítico
-      setError(error instanceof Error ? error.message : 'Error al obtener ganador');
+      if (error instanceof ApiError && error.errorCode === 'GANADOR_NO_ENCONTRADO') {
+        // 404 = no hay ganador aún, no es un error crítico
+        setGanador(null);
+      } else {
+        setError(error instanceof Error ? error.message : 'Error al obtener ganador');
+      }
       setGanador(null);
     } finally {
       setIsLoading(false);
@@ -183,7 +196,7 @@ export const useGanadorRifa = (uuidPublico: string) => {
 };
 
 // ─── Hook para obtener resultado de rifa (GET) ───
-export const useResultadoRifa = (uuidPublico: string) => {
+export const useResultadoRifa = (uuidPublico: string | null) => {
   const [resultado, setResultado] = useState<ResultadoRifaResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

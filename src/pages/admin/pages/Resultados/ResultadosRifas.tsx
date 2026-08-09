@@ -4,21 +4,17 @@ import { useLoterias } from '../Rifas/hooks/useLoterias';
 import {
   useRegistrarSorteoRifa,
   useDeclararGanador,
-  useActualizarEntrega,
   useGanadorRifa,
   useResultadoRifa,
 } from './hooks/useResultados';
-import type { RegistrarSorteoPayload, ActualizarEntregaPayload, EstadoEntrega } from '../../types/resultado.type';
+import type { RegistrarSorteoPayload} from '../../types/resultado.type';
 import { AlertBanner } from './components/AlertBanner';
 import { RifaSelector } from './components/RifaSelector';
 import { SorteoRegistrationCard } from './components/SorteoRegistrationCard';
 import { ResultadoOficialCard } from './components/ResultadoOficialCard';
 import { GanadorCard } from './components/GanadorCard';
-import { EntregaCard } from './components/EntregaCard';
 import {
-  getInitialEntregaForm,
   getInitialSorteoForm,
-  type EntregaFormData,
   type SorteoFormData,
 } from './components/resultadosRifas.types';
 
@@ -57,15 +53,13 @@ const getResultadoPreview = (rifa: { resultado_loteria?: { numeroGanador?: strin
 export default function ResultadosRifas() {
   const [selectedRifaUuid, setSelectedRifaUuid] = useState<string>('');
   const [sorteoForm, setSorteoForm] = useState<SorteoFormData>(getInitialSorteoForm());
-  const [entregaForm, setEntregaForm] = useState<EntregaFormData>(getInitialEntregaForm());
   const [formError, setFormError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const { rifas, isLoading: rifasLoading } = useRifas();
+  const { rifas, isLoading: rifasLoading } = useRifas(); // crear uno aparte.
   const { loterias, isLoading: loteriasLoading } = useLoterias();
   const { registrar, resultado: sorteoResult, isLoading: sorteoLoading, error: sorteoError, reset: resetSorteo } = useRegistrarSorteoRifa();
-  const { declarar, ganador: ganadorDeclarado, isLoading: ganadorLoading, error: ganadorError, reset: resetGanador } = useDeclararGanador();
-  const { actualizar, resultado: entregaResult, isLoading: entregaLoading, error: entregaError, reset: resetEntrega } = useActualizarEntrega();
+  const { declarar, ganador: ganadorDeclarado, isLoading: ganadorLoading, error: ganadorError,sinGanador, reset: resetGanador } = useDeclararGanador();
   const { resultado: resultadoOficial, isLoading: resultadoLoading, loadResultado } = useResultadoRifa(selectedRifaUuid);
   const { ganador: ganadorPublico, isLoading: ganadorPubLoading, loadGanador } = useGanadorRifa(selectedRifaUuid);
 
@@ -86,8 +80,6 @@ export default function ResultadosRifas() {
     }));
   }, [selectedRifa, resultadoOficial?.numeroGanador, resultadoOficial?.serie, resultadoOficial?.loteria?.numeroGanador, resultadoOficial?.loteria?.serie]);
 
-
-
   const handleSelectRifa = (uuid: string) => {
     const selected = rifas.find((r) => r.uuidPublico === uuid);
     console.log('Rifa seleccionada:', selected);
@@ -102,12 +94,12 @@ export default function ResultadosRifas() {
     });
 
 
-    setEntregaForm(getInitialEntregaForm());
+
     setFormError(null);
     setSuccessMessage(null);
     resetSorteo();
     resetGanador();
-    resetEntrega();
+  
   };
 
   const handleSorteoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -118,10 +110,6 @@ export default function ResultadosRifas() {
     }));
   };
 
-  const handleEntregaChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setEntregaForm((prev) => ({ ...prev, [name]: value }));
-  };
 
   const handleRegistrarSorteo = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -175,32 +163,7 @@ export default function ResultadosRifas() {
     }
   };
 
-  const handleActualizarEntrega = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedRifaUuid) return;
-
-    setFormError(null);
-    setSuccessMessage(null);
-
-    const payload: ActualizarEntregaPayload = {
-      estadoEntrega: entregaForm.estadoEntrega,
-      ...(entregaForm.nombreRecibido.trim() && { nombreRecibido: entregaForm.nombreRecibido }),
-      ...(entregaForm.telefonoConfirmado.trim() && { telefonoConfirmado: entregaForm.telefonoConfirmado }),
-      ...(entregaForm.observacion.trim() && { observacion: entregaForm.observacion }),
-    };
-
-    const result = await actualizar(selectedRifaUuid, payload);
-    if (result) {
-      setSuccessMessage(`Estado de entrega actualizado a: ${result.estadoEntrega}`);
-      loadGanador();
-    }
-  };
-
-  const handleEstadoSelect = (estado: EstadoEntrega) => {
-    setEntregaForm((prev) => ({ ...prev, estadoEntrega: estado }));
-  };
-
-  const currentError = formError || sorteoError || ganadorError || entregaError;
+  const currentError = formError || sorteoError || ganadorError;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-10 px-4 sm:px-6 lg:px-8">
@@ -251,17 +214,10 @@ export default function ResultadosRifas() {
               ganadorPubLoading={ganadorPubLoading}
               ganadorLoading={ganadorLoading}
               onDeclararGanador={handleDeclararGanador}
+              sinGanador={sinGanador}
             />
 
-            <EntregaCard
-              ganadorPublico={ganadorPublico}
-              entregaForm={entregaForm}
-              onEntregaChange={handleEntregaChange}
-              onSubmit={handleActualizarEntrega}
-              onEstadoSelect={handleEstadoSelect}
-              entregaLoading={entregaLoading}
-              entregaResult={entregaResult}
-            />
+      
           </>
         )}
       </div>

@@ -5,7 +5,7 @@ import type { ApiResponse } from "../types/api.types";
 const BASE_URL = "http://localhost:3000/api";
 
 export async function getRifas(): Promise<Rifa[]> {
-  const res = await fetch(`${BASE_URL}/rifas`);
+  const res = await fetch(`${BASE_URL}/rifas/publicas`);
  
   if (!res.ok) throw new Error("Error al obtener las rifas");
 

@@ -5,15 +5,15 @@ export type AuthServiceParams = {
 };
 
 export type AuthServiceResponse = {
-    token: string;
-    admin: {
-      idAdministrador: string;
-      uuidPublico: string;
-      nombre: string;
-      apellido: string;
-      correo: string;
-      rol: { idRol: number, nombre: string };
-    };
+  idAdministrador: string;
+  idRol: number;
+  idEstadoAdministrador: number;
+  correo: string;
+  nombre: string;
+  rol: string; // <-- Es un string plano como "SUPERADMIN"
+  iat: number;
+  exp: number;
+  token?: string; // Lo dejamos opcional (?) por si tu API también manda el token en este mismo objeto
   };
 
 

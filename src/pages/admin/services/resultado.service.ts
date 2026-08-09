@@ -14,14 +14,27 @@ import type {
 const API_URL = 'http://localhost:3000/api';
 
 // Helper para manejar respuestas
+export class ApiError extends Error {
+  errorCode?: string;
+  constructor(message: string, errorCode?: string) {
+    super(message);
+    this.name = 'ApiError';
+    this.errorCode = errorCode;
+  }
+}
+
 const handleResponse = async <T>(response: Response): Promise<T> => {
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
+    throw new ApiError(
+      errorData.error || errorData.message || `Error ${response.status}: ${response.statusText}`,
+      errorData.errorCode
+    );
   }
   const data = await response.json();
   return data.data || data;
 };
+
 
 // Helper para crear headers con auth
 const getHeaders = (withBody: boolean = true): HeadersInit => {
@@ -109,7 +122,7 @@ export const actualizarEntrega = async (
       headers: getHeaders(),
       body: JSON.stringify(payload),
     });
-    return handleResponse<ActualizarEntregaResponse>(response);
+    return handleResponse<ActualizarEntregaResponse>(response); 
   } catch (error) {
     console.error('Error al actualizar entrega:', error);
     throw error;
@@ -120,12 +133,18 @@ export const actualizarEntrega = async (
 // GET /rifas/:uuidPublico/ganador
 export const getGanadorRifa = async (
   uuidPublico: string
-): Promise<GanadorPublicoResponse> => {
+): Promise<GanadorPublicoResponse | null> => {
   try {
     const response = await fetch(`${API_URL}/rifas/${uuidPublico}/ganador`, {
       method: 'GET',
       credentials: 'include',
     });
+
+     // 404 = aún no hay ganador declarado para esta rifa, es un estado válido, no un error
+    if (response.status === 404) {
+      return null;
+    }
+    
     return handleResponse<GanadorPublicoResponse>(response);
   } catch (error) {
     console.error('Error al obtener ganador de rifa:', error);
@@ -137,12 +156,18 @@ export const getGanadorRifa = async (
 // GET /rifas/:uuidPublico/resultado
 export const getResultadoRifa = async (
   uuidPublico: string
-): Promise<ResultadoRifaResponse> => {
+): Promise<ResultadoRifaResponse | null> => {
   try {
     const response = await fetch(`${API_URL}/rifas/${uuidPublico}/resultado`, {
       method: 'GET',
       credentials: 'include',
     });
+
+    // 404 = la rifa aún no tiene resultado registrado, es un estado válido, no un error
+    if (response.status === 404) {
+      return null;
+    }
+
     return handleResponse<ResultadoRifaResponse>(response);
   } catch (error) {
     console.error('Error al obtener resultado de rifa:', error);

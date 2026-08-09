@@ -7,9 +7,11 @@ import './index.css';
 import App from './App.tsx';
 import { AppWrapper } from './pages/admin/components/common/PageMeta.tsx';
 import { ThemeProvider } from './pages/admin/context/ThemeContext.tsx';
+import {AuthProvider} from "./pages/admin/context/auth";
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
+    <AuthProvider>
     <ThemeProvider>
       <AppWrapper>
         <BrowserRouter>
@@ -17,5 +19,6 @@ createRoot(document.getElementById('root')!).render(
         </BrowserRouter>
       </AppWrapper>
     </ThemeProvider>
+  </AuthProvider>
   </StrictMode>,
 );

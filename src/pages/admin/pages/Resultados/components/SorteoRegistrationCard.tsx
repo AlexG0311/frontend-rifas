@@ -4,6 +4,7 @@ import type { LoteriaResponse } from '../../../types/loteria.type';
 import type { RifaResponse } from '../../../types/rifa.type';
 import type { SorteoFormData } from './resultadosRifas.types';
 import { SectionHeader } from './SectionHeader';
+import { AlertCircle } from 'lucide-react';
 
 interface SorteoRegistrationCardProps {
   form: SorteoFormData;
@@ -26,7 +27,7 @@ export const SorteoRegistrationCard: React.FC<SorteoRegistrationCardProps> = ({
   selectedRifa,
   resultadoOficial,
 }) => {
-  
+
   const formatDisplayDate = (value?: string | Date | null) => {
     if (!value) return '—';
 
@@ -49,17 +50,43 @@ export const SorteoRegistrationCard: React.FC<SorteoRegistrationCardProps> = ({
     });
   };
 
+  // Número ganador de LOTERÍA (no confundir con el de la rifa)
+  const numeroGanadorLoteria =
+    selectedRifa?.resultado_loteria?.numeroGanador ??
+    resultadoOficial?.numeroGanador ??
+    resultadoOficial?.loteria?.numeroGanador ??
+    null;
+
+  const hayResultadoLoteria =
+    numeroGanadorLoteria !== null &&
+    numeroGanadorLoteria !== undefined &&
+    String(numeroGanadorLoteria).trim() !== '';
+
   const previewLoteria = selectedRifa?.loteria.nombre || resultadoOficial?.nombreLoteria || '—';
   const previewFechaSorteo = form.fechaSorteo
     ? formatDisplayDate(form.fechaSorteo)
     : formatDisplayDate(resultadoOficial?.loteria?.fechaSorteo);
   const previewSerie = form.serie || String(selectedRifa?.resultado_loteria?.serie ?? selectedRifa?.resultado_rifa?.serie ?? resultadoOficial?.serie ?? resultadoOficial?.loteria?.serie ?? '') || '—';
-  const previewNumeroGanador = form.numeroGanador || String(selectedRifa?.resultado_loteria?.numeroGanador ?? resultadoOficial?.numeroGanador ?? resultadoOficial?.loteria?.numeroGanador ?? '') || '—';
+  const previewNumeroGanador = form.numeroGanador || String(numeroGanadorLoteria ?? '') || '—';
 
   return (
   <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-lg overflow-hidden mb-6">
     <div className="p-6 sm:p-8">
       <SectionHeader step={2} title="Registrar Resultado del Sorteo" />
+
+      {!hayResultadoLoteria && (
+        <div className="mb-4 flex items-start gap-3 rounded-2xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 p-4">
+          <AlertCircle size={20} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">
+              Aún no hay resultado de lotería registrado
+            </p>
+            <p className="text-xs text-amber-600/80 dark:text-amber-400/80 mt-1">
+              Debes registrar primero el resultado oficial de la lotería antes de poder registrar el sorteo de esta rifa.
+            </p>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={onSubmit} className="space-y-4">
         <div className="rounded-2xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-4">
@@ -97,15 +124,15 @@ export const SorteoRegistrationCard: React.FC<SorteoRegistrationCardProps> = ({
             value={form.numeroManual}
             onChange={onChange}
             placeholder="Ej: 589 (3 cifras)"
-            className="w-full rounded-2xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-2xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             required
-            disabled={sorteoLoading}
+            disabled={sorteoLoading || !hayResultadoLoteria}
           />
         </div>
 
         <button
           type="submit"
-          disabled={sorteoLoading}
+          disabled={sorteoLoading || !hayResultadoLoteria}
           className="w-full sm:w-auto rounded-3xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
         >
           {sorteoLoading ? (

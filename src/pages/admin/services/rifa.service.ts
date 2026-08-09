@@ -38,7 +38,7 @@ const getHeaders = (): HeadersInit => {
 // Obtener todas las rifas
 export const getRifas = async (): Promise<RifasListResponse> => {
   try {
-    const response = await fetch(`${API_URL}/rifas`, {
+    const response = await fetch(`${API_URL}/rifas/admin`, {
       credentials: "include",
       method: 'GET',
       headers: getHeaders(),
