@@ -56,8 +56,8 @@ const getInitialState = (): RifaFormData => ({
   titulo: '',
   descripcion: '',
   precioNumero: 0,
-  numeroInicial: 1,
-  numeroFinal: 100,
+  numeroInicial: 0,
+  numeroFinal: 9999,
   fechaInicio: formatForDatetimeLocal(new Date()),
   fechaCierre: formatForDatetimeLocal(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)),
   fechaSorteo: formatForDateOnly(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)),
@@ -138,6 +138,10 @@ export default function RifaFormPage() {
       setFormError('El título es requerido');
       return false;
     }
+    if (formData.titulo.trim().length < 3) {
+      setFormError('El título debe tener al menos 3 caracteres');
+      return false;
+    }
     if (!selectedLoteriaId) {
       setFormError('Debe seleccionar una lotería');
       return false;
@@ -146,12 +150,56 @@ export default function RifaFormPage() {
       setFormError('Debe agregar al menos un producto como premio');
       return false;
     }
-    if (formData.precioNumero <= 0) {
+    if (!formData.precioNumero || formData.precioNumero <= 0) {
       setFormError('El precio debe ser mayor a 0');
+      return false;
+    }
+
+    // ── Validaciones de número inicial / final ──────────────────────────────
+    if (
+      formData.numeroInicial === null ||
+      formData.numeroInicial === undefined ||
+      Number.isNaN(formData.numeroInicial)
+    ) {
+      setFormError('El número inicial es requerido');
+      return false;
+    }
+    if (
+      formData.numeroFinal === null ||
+      formData.numeroFinal === undefined ||
+      Number.isNaN(formData.numeroFinal)
+    ) {
+      setFormError('El número final es requerido');
+      return false;
+    }
+    if (formData.numeroInicial !== 0) {
+      setFormError('El número inicial debe ser 0');
+      return false;
+    }
+    if (formData.numeroFinal < 0) {
+      setFormError('El número final no puede ser negativo');
+      return false;
+    }
+    if (formData.numeroFinal > 9999) {
+      setFormError('El número final no puede ser mayor a 9999');
       return false;
     }
     if (formData.numeroInicial >= formData.numeroFinal) {
       setFormError('El número inicial debe ser menor al número final');
+      return false;
+    }
+
+    // ── Validaciones de fechas ───────────────────────────────────────────────
+    if (!formData.fechaInicio) {
+      setFormError('La fecha de inicio es requerida');
+      return false;
+    }
+    if (!formData.fechaCierre) {
+      setFormError('La fecha de cierre es requerida');
+      return false;
+    }
+    if (!formData.fechaSorteo) {
+      setFormError('La fecha de sorteo es requerida');
       return false;
     }
 
@@ -327,6 +375,7 @@ export default function RifaFormPage() {
                     onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
                     className="w-full rounded-2xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
+                    minLength={3}
                     disabled={isLoading}
                   />
                 </div>
@@ -383,7 +432,7 @@ export default function RifaFormPage() {
                       onChange={(e) => setFormData({ ...formData, precioNumero: Number(e.target.value) })}
                       className="w-full rounded-2xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-10 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required
-                      min="0"
+                      min={0.01}
                       step="0.01"
                       disabled={isLoading}
                     />
@@ -400,9 +449,11 @@ export default function RifaFormPage() {
                       onChange={(e) => setFormData({ ...formData, numeroInicial: Number(e.target.value) })}
                       className="w-full rounded-2xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required
-                      min="0"
+                      min={0}
+                      max={0}
                       disabled={isLoading}
                     />
+                    <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">Siempre debe ser 0</p>
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
@@ -414,7 +465,8 @@ export default function RifaFormPage() {
                       onChange={(e) => setFormData({ ...formData, numeroFinal: Number(e.target.value) })}
                       className="w-full rounded-2xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required
-                      min="0"
+                      min={1}
+                      max={9999}
                       disabled={isLoading}
                     />
                   </div>

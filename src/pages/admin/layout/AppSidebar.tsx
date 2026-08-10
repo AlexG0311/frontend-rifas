@@ -39,6 +39,11 @@ const navItems: NavItem[] = [
   },
   {
     icon: <BoxCubeIcon />,
+    name: "Combos",
+    subItems: [{ name: "Gestionar Combos", path: "/admin/combos", pro: false }],
+  },
+  {
+    icon: <BoxCubeIcon />,
     name: "Resultados",
     subItems: [
       { name: "Resultados de loterias", path: "/admin/resultados/loteria", pro: false },

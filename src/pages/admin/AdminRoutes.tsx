@@ -13,6 +13,7 @@ import RifaFormPage from "./pages/Rifas/RifaFormPage";
 import Home from "./pages/Dashboard/Home";
 import ResultadosLoteria from "./pages/Resultados/ResultadosLoteria";
 import ResultadosRifas from "./pages/Resultados/ResultadosRifas";
+import CombosPage from "./pages/Combos/CombosPage";
 import { ProtectedRoute } from './routes/ProtectedRoute';
 
 export default function AdminRoutes() {
@@ -37,6 +38,9 @@ export default function AdminRoutes() {
           } />
           <Route path="Rifas/editar/:uuidPublico" element={
             <ProtectedRoute><RifaFormPage /></ProtectedRoute>
+          } />
+          <Route path="combos" element={
+            <ProtectedRoute><CombosPage /></ProtectedRoute>
           } />
           <Route path="resultados/loteria" element={
             <ProtectedRoute><ResultadosLoteria /></ProtectedRoute>

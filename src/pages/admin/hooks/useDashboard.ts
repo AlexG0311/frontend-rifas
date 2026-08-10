@@ -59,7 +59,7 @@ function useDashboardLoader<T>(loader: () => Promise<T>, initialValue: T) {
 export const useDashboardResumen = () =>
   useDashboardLoader<DashboardResumenView>(getDashboardResumen, {
     rifasActivas: 0,
-    rifasFinalizadas: 0,
+    rifasSorteadas: 0,
     numerosVendidos: 0,
     ventasTotales: 0,
     moneda: 'COP',
