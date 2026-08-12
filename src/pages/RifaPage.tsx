@@ -68,7 +68,7 @@ export default function RifaPage() {
   if (!rifa || error) return <ErrorView error={error} onBack={() => navigate("/rifas")} />;
   if (rifa.estado?.nombre === "FINALIZADA") return <FinalizadaView rifa={rifa} onBack={() => navigate("/rifas")} />;
   if (rifa.estado?.nombre === "SORTEADA") return <SorteadaView rifa={rifa} resultado={resultado} isLoading={isLoadingResultado} onBack={() => navigate("/rifas")} />;
-  if (exitoso) return <ExitosoView seleccionados={seleccionados} cifras={cifras} onHome={() => navigate("/home")} />;
+  if (exitoso) return <ExitosoView seleccionados={seleccionados} cifras={cifras} />;
 
   return (
     <div className="min-h-screen bg-base-100">

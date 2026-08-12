@@ -6,6 +6,11 @@ import svgr from 'vite-plugin-svgr'
 
 // https://vite.dev/config/
 export default defineConfig({
+  server: {
+    allowedHosts:[
+      '2b7e-181-78-20-113.ngrok-free.app'
+    ]
+  },
   plugins: [
     tailwindcss(),
     react(),
@@ -14,6 +19,7 @@ export default defineConfig({
         exportType: "default",
       },
     }),
-    babel({ presets: [reactCompilerPreset()] })
+    babel({ presets: [reactCompilerPreset()] }),
+   
   ],
 })

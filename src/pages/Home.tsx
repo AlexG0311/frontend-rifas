@@ -9,7 +9,7 @@ export default function Home() {
         {/* Fondo: cambia la URL por tu imagen en public/images/hero.jpg */}
         <div
           className="absolute inset-0 bg-center bg-cover"
-          style={{ backgroundImage: "url('/images/hero/portada.jpg')" }}
+          style={{ backgroundImage: "url('/images/hero/portada.png')" }}
           aria-hidden
         />
         <div className="absolute inset-0 bg-black/45" aria-hidden />
@@ -23,11 +23,86 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Sección Nosotros */}
-      <section id="nosotros" className="py-16 px-6 max-w-4xl mx-auto text-center">
-        <h2 className="text-2xl font-bold mb-3">Sobre nosotros</h2>
-        <p className="text-base text-base-content/70 max-w-3xl mx-auto">Somos una comunidad que organiza rifas transparentes y con propósito. Cada participación apoya iniciativas locales y te da la oportunidad de ganar grandes premios.</p>
-      </section>
+
+          {/* Sección Sobre nosotros */}
+    <section id="nosotros" className="py-20 px-6">
+      <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+
+        {/* Foto */}
+        <div className="flex justify-center">
+          <div className="relative">
+            <div className="absolute -inset-4 rounded-3xl bg-primary/10 rotate-3" />
+
+            <img
+              src="/images/FotoAndres.jpeg"
+              alt="Rifas Monterroza"
+              className="relative w-full max-w-md rounded-3xl shadow-2xl object-cover"
+            />
+          </div>
+        </div>
+
+        {/* Contenido */}
+        <div>
+          <span className="text-sm font-bold uppercase tracking-widest text-primary">
+            Vive la emoción
+          </span>
+
+          <h2 className="text-3xl md:text-4xl font-extrabold mt-2 mb-5">
+            Tu próximo premio puede estar a un número de distancia
+          </h2>
+
+          <p className="text-base-content/70 text-lg leading-relaxed mb-4">
+            Participar es fácil. Elige la rifa que más te guste,
+            selecciona tus números o déjalos al azar y prepárate
+            para vivir la emoción del sorteo.
+          </p>
+
+          <p className="text-base-content/70 leading-relaxed mb-8">
+            Cada participación es una nueva oportunidad de ganar.
+            Explora nuestras rifas, elige tu oportunidad y
+            ¡que la suerte esté de tu lado!
+          </p>
+
+          {/* Beneficios */}
+          <div className="grid sm:grid-cols-3 gap-4 mb-8">
+
+            <div>
+              <div className="text-2xl mb-2">🎟️</div>
+              <h3 className="font-bold">Fácil de participar</h3>
+              <p className="text-sm text-base-content/60">
+                Elige tus números o déjalos al azar.
+              </p>
+            </div>
+
+            <div>
+              <div className="text-2xl mb-2">🎁</div>
+              <h3 className="font-bold">Grandes premios</h3>
+              <p className="text-sm text-base-content/60">
+                Participa por increíbles premios.
+              </p>
+            </div>
+
+            <div>
+              <div className="text-2xl mb-2">✨</div>
+              <h3 className="font-bold">Tu oportunidad</h3>
+              <p className="text-sm text-base-content/60">
+                Cada número puede ser el ganador.
+              </p>
+            </div>
+
+          </div>
+
+          <Link
+            to="/rifas"
+            className="inline-flex items-center gap-2 bg-primary text-primary-content rounded-full px-7 py-3 font-bold shadow-lg hover:scale-105 transition"
+          >
+            Ver rifas disponibles
+            <span>→</span>
+          </Link>
+        </div>
+
+      </div>
+    </section>
 
       {/* Footer con contacto y redes */}
       <footer id="contacto" className="mt-auto bg-base-200 border-t border-base-300 py-8">
