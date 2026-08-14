@@ -16,6 +16,7 @@ export interface NumerosReservado {
 export interface EnviarParaApartar {
   uuidRifa: string;
   numeros: number[];
+  uuidCombo?: string | null;
 }
 
 export interface DatosCliente {

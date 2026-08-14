@@ -3,12 +3,18 @@ import type { NumerosReservado, CheckoutPayload } from "../types/reserva.types";
 
 const BASE_URL = "http://localhost:3000/api";
 
-export async function ReservarNumero(uuidRifa: string, numeros: number[]): Promise<NumerosReservado> {
+export async function ReservarNumero(uuidRifa: string, numeros: number[], uuidCombo?: string): Promise<NumerosReservado> {
   const res = await fetch(`${BASE_URL}/rifas/${uuidRifa}/apartar`, {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ numeros }),
+    body: JSON.stringify({
+    numeros,
+      ...(uuidCombo && { uuidCombo }), // solo incluye el campo si hay combo seleccionado
+    }), // NUEVO: incluye uuidCombo en el payload
+  }).catch((error) => {
+    console.error("Error al enviar la solicitud de reserva:", error);
+    throw new Error("Error al apartar los números");
   });
 
   if (!res.ok) {

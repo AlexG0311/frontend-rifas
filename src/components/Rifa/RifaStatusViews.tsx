@@ -2,6 +2,7 @@ import { Loader2, AlertCircle, Ticket, Trophy, CheckCircle2, ArrowLeft } from "l
 import type { Rifa } from "../../types/rifa.types";
 import { useRef } from "react";
 import { useWidget } from "../../wompi/useWidget"; 
+import type { WidgetWompiParams } from "../../services/wompi.service";
 
 interface LoadingViewProps {}
 export function LoadingView(_props: LoadingViewProps) {
@@ -141,21 +142,13 @@ export function SorteadaView({ rifa, resultado, isLoading, onBack }: SorteadaVie
 interface ExitosoViewProps {
   seleccionados: number[];
   cifras: number;
-  totalPrecio: number; // en pesos (no centavos), lo convertimos abajo
-  referencia: string;  // debe ser única por transacción
-  firmaIntegridad: string; // hash generado por tu backend, NUNCA hardcodeado
+  datosPago: WidgetWompiParams;
 }
 
-export function ExitosoView({ 
-  seleccionados, 
-  cifras, 
-  totalPrecio, // pasarlo por la reserva
-  referencia, // pasarlo por la reserva
-  firmaIntegridad, // generarlo en el backend y pasarlo por la reserva
-}: ExitosoViewProps) {
+export function ExitosoView({ seleccionados, cifras, datosPago }: ExitosoViewProps) {
+  const wompiContainerRef = useRef<HTMLDivElement>(null);
+  useWidget({ wompiContainerRef, datosPago });
 
- const wompiContainerRef = useRef<HTMLDivElement>(null);
- useWidget({wompiContainerRef,totalPrecio,referencia,firmaIntegridad });
   return (
     <div className="min-h-screen bg-base-100 flex items-center justify-center">
       <div className="text-center flex flex-col items-center gap-6 p-8 max-w-sm">

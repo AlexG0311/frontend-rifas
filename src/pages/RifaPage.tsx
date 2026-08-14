@@ -41,14 +41,13 @@ export default function RifaPage() {
     totalPrecio,
     toggleNumero,
     quitarNumero,
+    datosPago,
+    cargandoPago,
     seleccionarCombo,
     limpiarSeleccion,
     handleContinuarPago,
     handleCloseCheckout,
-    setExitoso,
-    setIsCheckoutOpen,
-    setReservaActual,
-    setCheckoutCompletado,
+    handleCheckoutExitoso, // NUEVO
   } = useRifaCheckout({ rifa, numeros });
 
   const loading = loadingRifas || loadingNumeros;
@@ -60,7 +59,6 @@ export default function RifaPage() {
   const total = numeros.length || rifaTotal || 0;
   const porcentajeVendido = total > 0 ? Math.round(((vendidos + reservados) / total) * 100) : 0;
 
-  // A partir de 100 números, se vende por combos aleatorios en vez de grilla navegable
   const esGrillaChica = total <= 100;
   const cifras = String(Math.max(total - 1, 0)).length;
 
@@ -68,7 +66,23 @@ export default function RifaPage() {
   if (!rifa || error) return <ErrorView error={error} onBack={() => navigate("/rifas")} />;
   if (rifa.estado?.nombre === "FINALIZADA") return <FinalizadaView rifa={rifa} onBack={() => navigate("/rifas")} />;
   if (rifa.estado?.nombre === "SORTEADA") return <SorteadaView rifa={rifa} resultado={resultado} isLoading={isLoadingResultado} onBack={() => navigate("/rifas")} />;
-  if (exitoso) return <ExitosoView seleccionados={seleccionados} cifras={cifras} />;
+
+if (exitoso) {
+  if (cargandoPago || !datosPago) {
+    return (
+      <div className="min-h-screen bg-base-100 flex items-center justify-center">
+        <Loader2 size={40} className="animate-spin text-primary" />
+      </div>
+    );
+  }
+  return (
+    <ExitosoView
+      seleccionados={seleccionados}
+      cifras={cifras}
+      datosPago={datosPago}
+    />
+  );
+}
 
   return (
     <div className="min-h-screen bg-base-100">
@@ -92,7 +106,7 @@ export default function RifaPage() {
             />
           ) : (
             <RifaCombos
-             rifa={rifa}
+              rifa={rifa}
               total={total}
               combosLoading={combosLoading}
               combos={combos}
@@ -153,13 +167,7 @@ export default function RifaPage() {
         reserva={reservaActual}
         totalPrecio={totalPrecio}
         tituloRifa={rifa?.titulo ?? "Rifa"}
-        onSuccess={() => {
-          setIsCheckoutOpen(false);
-          setExitoso(true);
-          setReservaActual(null);
-          localStorage.removeItem("reservaActual");
-          setCheckoutCompletado(true);
-        }}
+        onSuccess={handleCheckoutExitoso}
       />
     </div>
   );

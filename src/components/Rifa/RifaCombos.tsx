@@ -22,7 +22,7 @@ interface RifaCombosProps {
   comboSinStock: number | null;
   seleccionados: number[];
   cifras: number;
-  seleccionarCombo: (cantidad: number, precio: number) => void;
+  seleccionarCombo: (cantidad: number, precio: number,uuidCombo: string) => void;
   limpiarSeleccion: () => void;
 }
 export default function RifaCombos({
@@ -75,7 +75,7 @@ const combosParaMostrar = [comboUnitario, ...combos].sort((a, b) => a.orden - b.
           {combosParaMostrar.map((combo) => (
             <button
               key={combo.uuidPublico}
-              onClick={() => seleccionarCombo(combo.cantidadNumeros, Number(combo.precio))}
+              onClick={() => seleccionarCombo(combo.cantidadNumeros, Number(combo.precio), combo.uuidPublico)}
               disabled={disponibles < combo.cantidadNumeros}
               className={`
                 flex flex-col items-center gap-2 rounded-2xl border-2 p-5 transition-all

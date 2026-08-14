@@ -8,7 +8,7 @@ import svgr from 'vite-plugin-svgr'
 export default defineConfig({
   server: {
     allowedHosts:[
-      '2b7e-181-78-20-113.ngrok-free.app'
+      '32ba-181-78-20-113.ngrok-free.app'
     ]
   },
   plugins: [

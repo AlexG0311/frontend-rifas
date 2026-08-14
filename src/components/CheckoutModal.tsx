@@ -1,15 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { X, User, CreditCard, Mail, Phone, MapPin, CheckCircle2, Loader2, AlertCircle, ShieldCheck } from "lucide-react";
 import type { NumerosReservado, DatosCliente } from "../types/reserva.types";
+import type {CompraResponse} from "../types/compra.type";
 import { CheckoutReserva } from "../services/reserva.service";
-
+import { crearCompra } from "../services/crearcompra.service";
 interface CheckoutModalProps {
   isOpen: boolean;
   onClose: () => void;
   reserva: NumerosReservado | null;
   totalPrecio: number;
   tituloRifa: string;
-  onSuccess: () => void;
+  onSuccess: (compra: CompraResponse) => void; // ← ahora recibe la compra creada
 }
 
 export default function CheckoutModal({
@@ -39,23 +40,23 @@ export default function CheckoutModal({
     aceptaNotificaciones: true,
   });
 
-if (isOpen !== prevIsOpen) {
-  setPrevIsOpen(isOpen);
-  if (isOpen) {
-    setError(null);
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
+    if (isOpen) {
+      setError(null);
+    }
   }
-}
 
-useEffect(() => {
-  const dialog = dialogRef.current;
-  if (!dialog) return;
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
 
-  if (isOpen) {
-    if (!dialog.open) dialog.showModal();
-  } else {
-    if (dialog.open) dialog.close();
-  }
-}, [isOpen]);
+    if (isOpen) {
+      if (!dialog.open) dialog.showModal();
+    } else {
+      if (dialog.open) dialog.close();
+    }
+  }, [isOpen]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -67,7 +68,7 @@ useEffect(() => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => { // usamos React.SubmitEvent para tipar correctamente el evento de submit
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!reserva) return;
 
@@ -75,12 +76,17 @@ useEffect(() => {
     setError(null);
 
     try {
+      // 1. Confirma el checkout con los datos del cliente (reserva → CONFIRMADA)
       await CheckoutReserva(reserva.uuidPublico, {
         sessionToken: reserva.sessionToken,
         cliente: formData,
       });
-      onSuccess();
-      } catch (err) {
+
+      // 2. Crea la compra — aquí es donde el precio queda CONGELADO
+      const compra = await crearCompra(reserva.uuidPublico);
+
+      onSuccess(compra);
+    } catch (err) {
       const message =
         err instanceof Error ? err.message : "Ocurrió un error al procesar tu solicitud.";
       setError(message);
