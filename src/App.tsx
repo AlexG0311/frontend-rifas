@@ -3,6 +3,7 @@ import Home from "./pages/Home";
 import Rifas from "./pages/Rifas";
 import RifaPage from "./pages/RifaPage";
 import AdminRoutes from "./pages/admin/AdminRoutes";
+import PagoResultado from "./pages/PagoResultado";
 
 export default function App() {
   return (
@@ -11,6 +12,7 @@ export default function App() {
       <Route path="/home" element={<Home />} />
       <Route path="/rifas" element={<Rifas />} />
       <Route path="/rifa/:uuid" element={<RifaPage />} />
+      <Route path="/pago/resultado" element={<PagoResultado />} />
       <Route path="/admin/*" element={<AdminRoutes />} />
       <Route path="*" element={<Navigate to="/home" replace />} />
     </Routes>

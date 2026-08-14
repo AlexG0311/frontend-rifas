@@ -24,3 +24,11 @@ export const crearCompra = async (uuidPublico:string): Promise<CompraResponse> =
   });
   return handleResponse<CompraResponse>(response);
 };
+
+export const getCompra = async (uuidPublico: string): Promise<CompraResponse> => {
+  const response = await fetch(`${API_URL}/compras/${uuidPublico}`, {
+    method: 'GET',
+    credentials: 'include',
+  });
+  return handleResponse<CompraResponse>(response);
+};
