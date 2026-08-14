@@ -1,7 +1,7 @@
 import { ApiError } from '../pages/admin/services/resultado.service';// reutiliza la misma clase de error ya existente
 import type { ComboPayload, ComboResponse } from '../types/combo.type';
 
-const API_URL = 'http://localhost:3000/api/combos';
+const API_URL = `${import.meta.env.VITE_API_URL}/api/combos`;
 
 const handleResponse = async <T>(response: Response): Promise<T> => {
   if (!response.ok) {

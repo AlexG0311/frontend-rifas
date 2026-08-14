@@ -2,7 +2,7 @@ import type { AuthServiceParams, AuthServiceResponse } from '../types/auth.type'
 import type { ApiResponse } from '../types/api.type';
 
 export const AuthService = async ({ correo, password }: AuthServiceParams) => {
-  const response = await fetch(`http://localhost:3000/api/admin/auth/login`, {
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/auth/login`, {
     method: 'POST',
     credentials: 'include',
     headers: {
@@ -18,7 +18,7 @@ export const AuthService = async ({ correo, password }: AuthServiceParams) => {
 };
 
 export const Authme = async () => {
-  const response = await fetch(`http://localhost:3000/api/admin/auth/me`, {
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/auth/me`, {
     method: 'GET',
     credentials: 'include',
   });
@@ -27,7 +27,7 @@ export const Authme = async () => {
 };
 
 export const CerrarSesion = async (): Promise<void> => {
-  const response = await fetch('http://localhost:3000/api/admin/auth/logout', {
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/auth/logout`, {
     method: 'POST',
     credentials: 'include',
   });

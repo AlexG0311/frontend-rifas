@@ -1,7 +1,7 @@
 import type { ApiResponse } from '../types/api.type';
 import type { GanadorRifa } from '../types/ganador.type';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = `${import.meta.env.VITE_API_URL}/api`;
 
 const handleResponse = async <T>(response: Response): Promise<T> => {
   if (!response.ok) {

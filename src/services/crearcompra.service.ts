@@ -1,6 +1,6 @@
 import type { CompraResponse } from '../types/compra.type';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = `${import.meta.env.VITE_API_URL}/api`;
 import { ApiError } from '../pages/admin/services/resultado.service';// reutiliza la misma clase de error ya existente
 const handleResponse = async <T>(response: Response): Promise<T> => {
   if (!response.ok) {

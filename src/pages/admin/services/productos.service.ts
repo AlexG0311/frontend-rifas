@@ -4,7 +4,7 @@ import type { productosGetpayload } from "../types/productos.type"
 
 export const CreateProductos = async (data: productospayload): Promise<productospayload> => {
 
-const res = await fetch("http://localhost:3000/api/productos/",
+const res = await fetch(`${API_URL}/productos/`,
     {
         credentials: "include",
         method: "POST",
@@ -22,7 +22,7 @@ return respuesta.data
 
 export const GetProductos = async () => {
 
-const res = await fetch("http://localhost:3000/api/productos/",
+const res = await fetch(`${API_URL}/productos/`,
     {
         credentials: "include",
         method: "GET",
@@ -35,7 +35,7 @@ return respuesta.data
 
 export const UpdateProductos = async (uuid_publica:string, data:productospayload) => {
 
-const res = await fetch(`http://localhost:3000/api/productos/${uuid_publica}`,
+const res = await fetch(`${API_URL}/productos/${uuid_publica}`,
     {
         credentials: "include",
         method: "PATCH",
@@ -51,7 +51,7 @@ return respuesta.data
 
 export const DeteleProductos = async (uuid_publica:string) => {
 
-const res = await fetch(`http://localhost:3000/api/productos/${uuid_publica}`,
+const res = await fetch(`${API_URL}/productos/${uuid_publica}`,
     {
         credentials: "include",
         method: "DELETE",

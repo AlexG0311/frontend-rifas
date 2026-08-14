@@ -1,7 +1,7 @@
 import type { ApiResponse } from "../types/api.types";
 import type { NumerosReservado, CheckoutPayload } from "../types/reserva.types";
 
-const BASE_URL = "http://localhost:3000/api";
+const BASE_URL = `${import.meta.env.VITE_API_URL}/api`;
 
 export async function ReservarNumero(uuidRifa: string, numeros: number[], uuidCombo?: string): Promise<NumerosReservado> {
   const res = await fetch(`${BASE_URL}/rifas/${uuidRifa}/apartar`, {
@@ -43,7 +43,7 @@ export async function CheckoutReserva(uuidPublicoReserva: string, payload: Check
   return json.data;
 }
   export function CancelarReserva( uuidPublico:string, sessionToken:string): Promise<NumerosReservado> {
-      return fetch(`http://localhost:3000/api/reservas/${uuidPublico}/cancelar`,{
+      return fetch(`${import.meta.env.VITE_API_URL}/api/reservas/${uuidPublico}/cancelar`,{
         method: "POST",
         credentials: "include",
         headers: {'Content-Type' : 'application/json'},
@@ -56,7 +56,7 @@ export async function CheckoutReserva(uuidPublicoReserva: string, payload: Check
   }
 
   export async function ObtenerReservaPorToken(sessionToken: string): Promise<NumerosReservado | null> {
-    const res = await fetch(`http://localhost:3000/api/reservas/session/${sessionToken}`);
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/reservas/session/${sessionToken}`);
     if (!res.ok) return null;
     const json = await res.json();
     return json.data ?? null;

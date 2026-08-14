@@ -11,7 +11,7 @@ import type {
   ResultadoRifaResponse,
 } from '../types/resultado.type';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = `${import.meta.env.VITE_API_URL}/api`;
 
 // Helper para manejar respuestas
 export class ApiError extends Error {

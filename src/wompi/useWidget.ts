@@ -21,7 +21,7 @@ export const useWidget = ({ wompiContainerRef, datosPago }: UseWidgetParams) => 
     script.setAttribute("data-amount-in-cents", String(datosPago.amountInCents));
     script.setAttribute("data-reference", datosPago.reference);
     script.setAttribute("data-signature:integrity", datosPago.signature);
-    script.setAttribute("data-redirect-url", datosPago.redirectUrl);
+    // script.setAttribute("data-redirect-url", datosPago.redirectUrl);
 
     if (datosPago.customerData) {
       script.setAttribute("data-customer-data:email", datosPago.customerData.email);

@@ -8,7 +8,7 @@ import type {
     DashboardVentaMensualView,
 } from '../../types/dashboard.types';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = `${import.meta.env.VITE_API_URL}/api`;
 
 const getHeaders = (): HeadersInit => {
     const headers: HeadersInit = {
