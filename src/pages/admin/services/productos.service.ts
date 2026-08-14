@@ -2,6 +2,7 @@ import type  { ApiResponse } from "../types/api.type"
 import type  { productospayload } from "../types/productos.type"
 import type { productosGetpayload } from "../types/productos.type"
 
+const API_URL = `${import.meta.env.VITE_API_URL}/api`;
 export const CreateProductos = async (data: productospayload): Promise<productospayload> => {
 
 const res = await fetch(`${API_URL}/productos/`,
