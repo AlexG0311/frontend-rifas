@@ -18,3 +18,81 @@
 html {
   scroll-behavior: smooth;
 }
+
+/* Paleta de colores para la página principal y sitio público */
+.public-theme {
+  --color-primary: #8B5CF6;
+  --color-primary-hover: #7C3AED;
+  --color-primary-content: #ffffff;
+  
+  --color-warning: #F5C542;
+  --color-warning-content: #0F071A;
+  --color-accent: #F5C542;
+  --color-accent-content: #0F071A;
+
+  --color-base-100: #0F071A;
+  --color-base-200: #180D2B;
+  --color-base-300: #2A1745;
+  --color-base-content: #F5F3FF;
+
+  /* Variables DaisyUI HSL */
+  --p: 258 90% 66%;
+  --pf: 262 83% 58%;
+  --pc: 0 0% 100%;
+  --b1: 265 58% 6%;
+  --b2: 262 54% 11%;
+  --b3: 265 50% 18%;
+  --bc: 250 100% 98%;
+  --wa: 44 90% 61%;
+  --wac: 265 58% 6%;
+  --ac: 44 90% 61%;
+  --acc: 265 58% 6%;
+
+  background-color: #0F071A;
+  color: #F5F3FF;
+}
+
+/* Custom Overrides para botones y elementos interactivos en el sitio público */
+.public-theme .btn-primary {
+  background-color: #8B5CF6 !important;
+  border-color: #8B5CF6 !important;
+  color: #ffffff !important;
+  transition: all 0.2s ease-in-out;
+}
+
+.public-theme .btn-primary:hover,
+.public-theme .btn-primary:active,
+.public-theme .btn-primary:focus {
+  background-color: #7C3AED !important;
+  border-color: #7C3AED !important;
+}
+
+.public-theme .badge-primary {
+  background-color: #8B5CF6 !important;
+  border-color: #8B5CF6 !important;
+  color: #ffffff !important;
+}
+
+.public-theme .text-dorado,
+.public-theme .text-gold {
+  color: #F5C542 !important;
+}
+
+.public-theme .bg-dorado,
+.public-theme .bg-gold {
+  background-color: #F5C542 !important;
+}
+
+.public-theme .border-dorado,
+.public-theme .border-gold {
+  border-color: #F5C542 !important;
+}
+
+.public-theme .badge-warning,
+.public-theme .badge-dorado {
+  background-color: #F5C542 !important;
+  border-color: #F5C542 !important;
+  color: #0F071A !important;
+  font-weight: 700;
+}
+

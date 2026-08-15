@@ -47,7 +47,7 @@ export default function PagoResultado() {
 
     try {
       const data = await getCompra(uuidCompra);
-      console.log("[PagoResultado] Datos de la compra recibidos del backend:", {
+      console.log("[PagoResultado] Datos de la compra recibidos del backend: ", {
         idCompra: data.idCompra,
         codigoCompra: data.codigoCompra,
         estado: data.estado,
