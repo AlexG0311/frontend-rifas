@@ -44,6 +44,7 @@ export default function RifaPage() {
     datosPago,
     cargandoPago,
     seleccionarCombo,
+    comboSeleccionadoUuid,
     limpiarSeleccion,
     handleContinuarPago,
     handleCloseCheckout,
@@ -113,6 +114,7 @@ if (exitoso) {
               disponibles={disponibles}
               comboSinStock={comboSinStock}
               seleccionados={seleccionados}
+              comboSeleccionadoUuid={comboSeleccionadoUuid}
               cifras={cifras}
               seleccionarCombo={seleccionarCombo}
               limpiarSeleccion={limpiarSeleccion}

@@ -1,4 +1,4 @@
-import { Loader2, Shuffle, RefreshCw } from "lucide-react";
+import { Loader2, Shuffle, RefreshCw, Check } from "lucide-react";
 import type { ComboResponse } from "../../types/combo.type.ts";
 
 interface Combo {
@@ -21,10 +21,12 @@ interface RifaCombosProps {
   disponibles: number;
   comboSinStock: number | null;
   seleccionados: number[];
+  comboSeleccionadoUuid: string | null; // NUEVO
   cifras: number;
-  seleccionarCombo: (cantidad: number, precio: number,uuidCombo: string) => void;
+  seleccionarCombo: (cantidad: number, precio: number, uuidCombo: string) => void;
   limpiarSeleccion: () => void;
 }
+
 export default function RifaCombos({
   rifa,
   total,
@@ -33,29 +35,30 @@ export default function RifaCombos({
   disponibles,
   comboSinStock,
   seleccionados,
+  comboSeleccionadoUuid,
   cifras,
   seleccionarCombo,
   limpiarSeleccion,
 }: RifaCombosProps) {
-// Combo implícito de 1 número, usando el precio base de la rifa
-const comboUnitario: ComboResponse = {
-  idCombo: "unitario",
-  uuidPublico: "unitario",
-  cantidadNumeros: 1,
-  precio: String(rifa.precioNumero),
-  etiqueta: "1 número",
-  descripcion: "Un número bendecido por la suerte",
-  destacado: false,
-  orden: -1, // siempre primero
-  activo: true,
-  fechaCreacion: "",
-  fechaActualizacion: null,
-};
+  // Combo implícito de 1 número, usando el precio base de la rifa
+  const comboUnitario: ComboResponse = {
+    idCombo: "unitario",
+    uuidPublico: "unitario",
+    cantidadNumeros: 1,
+    precio: String(rifa.precioNumero),
+    etiqueta: "1 número",
+    descripcion: "Un número bendecido por la suerte",
+    destacado: false,
+    orden: -1,
+    activo: true,
+    fechaCreacion: "",
+    fechaActualizacion: null,
+  };
 
+  const combosParaMostrar = [comboUnitario, ...combos].sort((a, b) => a.orden - b.orden);
 
-
-  // Combina el combo unitario (siempre presente) con los combos configurados por el admin
-const combosParaMostrar = [comboUnitario, ...combos].sort((a, b) => a.orden - b.orden);
+  // Si no hay seleccionados, ningún combo cuenta como "elegido" aunque haya un uuid residual
+  const uuidActivo = seleccionados.length > 0 ? comboSeleccionadoUuid : null;
 
   return (
     <>
@@ -72,34 +75,51 @@ const combosParaMostrar = [comboUnitario, ...combos].sort((a, b) => a.orden - b.
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {combosParaMostrar.map((combo) => (
-            <button
-              key={combo.uuidPublico}
-              onClick={() => seleccionarCombo(combo.cantidadNumeros, Number(combo.precio), combo.uuidPublico)}
-              disabled={disponibles < combo.cantidadNumeros}
-              className={`
-                flex flex-col items-center gap-2 rounded-2xl border-2 p-5 transition-all
-                disabled:opacity-40 disabled:cursor-not-allowed
-                ${combo.destacado
-                  ? "border-primary bg-primary/10 shadow-lg shadow-primary/20 hover:bg-primary/15"
-                  : "border-base-300 bg-base-200 hover:border-primary/50 hover:bg-base-300/50"}
-              `}
-            >
-              {combo.destacado && (
-                <span className="badge badge-primary badge-sm mb-1">Más popular</span>
-              )}
-              <Shuffle size={26} className="text-primary" />
-              <span className="text-base font-extrabold text-base-content">{combo.etiqueta}</span>
-              {combo.descripcion && (
-                <span className="text-xs text-base-content/50 text-center leading-tight">
-                  {combo.descripcion}
+          {combosParaMostrar.map((combo) => {
+            // El combo "unitario" nunca manda uuidCombo al backend (se envía como null/undefined),
+            // así que se marca como seleccionado cuando no hay uuid activo pero sí hay números elegidos
+            // y la cantidad coincide con 1.
+            const esSeleccionado =
+              combo.uuidPublico === "unitario"
+                ? uuidActivo === null && seleccionados.length === 1 && seleccionados.length === combo.cantidadNumeros
+                : combo.uuidPublico === uuidActivo;
+
+            return (
+              <button
+                key={combo.uuidPublico}
+                onClick={() => seleccionarCombo(combo.cantidadNumeros, Number(combo.precio), combo.uuidPublico)}
+                disabled={disponibles < combo.cantidadNumeros}
+                className={`
+                  relative flex flex-col items-center gap-2 rounded-2xl border-2 p-5 transition-all
+                  disabled:opacity-40 disabled:cursor-not-allowed
+                  ${esSeleccionado
+                    ? "border-primary bg-primary/15 shadow-lg shadow-primary/30 ring-2 ring-primary/40"
+                    : combo.destacado
+                      ? "border-primary/40 bg-primary/5 hover:bg-primary/10 hover:border-primary/60"
+                      : "border-base-300 bg-base-200 hover:border-primary/50 hover:bg-base-300/50"}
+                `}
+              >
+                {esSeleccionado && (
+                  <span className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-primary text-primary-content flex items-center justify-center shadow-md">
+                    <Check size={14} strokeWidth={3} />
+                  </span>
+                )}
+                {!esSeleccionado && combo.destacado && (
+                  <span className="badge badge-primary badge-sm mb-1">Más popular</span>
+                )}
+                <Shuffle size={26} className="text-primary" />
+                <span className="text-base font-extrabold text-base-content">{combo.etiqueta}</span>
+                {combo.descripcion && (
+                  <span className="text-xs text-base-content/50 text-center leading-tight">
+                    {combo.descripcion}
+                  </span>
+                )}
+                <span className="text-primary font-bold mt-1">
+                  ${Number(combo.precio).toLocaleString()}
                 </span>
-              )}
-              <span className="text-primary font-bold mt-1">
-                ${Number(combo.precio).toLocaleString()}
-              </span>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       )}
 
