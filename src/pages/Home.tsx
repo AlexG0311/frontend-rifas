@@ -8,7 +8,7 @@ export default function Home() {
       <header className="relative h-[70vh] md:h-[75vh] flex items-center justify-center overflow-hidden border-b border-[#2A1745]">
         <div
           className="absolute inset-0 bg-center bg-cover"
-          style={{ backgroundImage: "url('/images/hero/portada.png')" }}
+          style={{ backgroundImage: "url('/images/hero/portada.webp')" }}
           aria-hidden
         />
         <div className="absolute inset-0 bg-gradient-to-b from-[#0F071A]/85 via-[#0F071A]/75 to-[#0F071A]" aria-hidden />
