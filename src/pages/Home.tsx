@@ -120,15 +120,14 @@ export default function Home() {
         <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
             <h3 className="font-bold text-lg text-[#F5F3FF]">Contáctanos</h3>
-            <p className="text-sm text-[#F5F3FF]/70">hola@ejemplo.com · +56 9 1234 5678</p>
+            <p className="text-sm text-[#F5F3FF]/70">monterrozaandres875@gmail.com · 312 8710466</p>
           </div>
 
           <div className="text-center md:text-right">
             <p className="font-medium mb-2 text-[#F5F3FF]">Síguenos</p>
             <div className="flex items-center gap-4 justify-center md:justify-end text-sm">
-              <a href="#" className="text-[#F5F3FF]/70 hover:text-[#F5C542] transition-colors">Twitter</a>
-              <a href="#" className="text-[#F5F3FF]/70 hover:text-[#F5C542] transition-colors">Instagram</a>
-              <a href="#" className="text-[#F5F3FF]/70 hover:text-[#F5C542] transition-colors">Facebook</a>
+              <a href="https://www.youtube.com/@monterroza01" className="text-[#F5F3FF]/70 hover:text-[#F5C542] transition-colors">Youtube</a>
+              <a href="https://www.facebook.com/profile.php?id=61555710151374&mibextid=wwXIfr&mibextid=wwXIfr" className="text-[#F5F3FF]/70 hover:text-[#F5C542] transition-colors">Facebook</a>
             </div>
           </div>
         </div>
