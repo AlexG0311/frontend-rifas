@@ -7,6 +7,12 @@ interface RifaHeaderProps {
 }
 
 export default function RifaHeader({ rifa, onBack }: RifaHeaderProps) {
+
+ const total = rifa.numeroFinal - rifa.numeroInicial + 1;
+ const mostrarPrecio = total <= 100;
+
+
+
   return (
     <header className="bg-[#180D2B] border-b border-[#2A1745] text-[#F5F3FF]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-8">
@@ -35,12 +41,15 @@ export default function RifaHeader({ rifa, onBack }: RifaHeaderProps) {
           </div>
 
           <div className="flex flex-wrap gap-3 sm:flex-col sm:items-end">
+           { mostrarPrecio ? ( 
             <div className="bg-[#0F071A] border border-[#2A1745] rounded-2xl px-5 py-2.5 text-center shadow-lg">
               <p className="text-[#F5F3FF]/50 text-[10px] uppercase tracking-widest font-semibold">Precio / número</p>
               <p className="text-2xl sm:text-3xl font-black text-[#F5C542]">
                 ${rifa.precioNumero?.toLocaleString()}
               </p>
-            </div>
+            </div>):  
+            <div className="bg-[#0F071A] border border-[#2A1745] rounded-2xl px-5 py-2.5 text-center shadow-lg">
+            </div>}
             {rifa.fechaSorteo && (
               <div className="bg-[#0F071A] border border-[#2A1745] rounded-2xl px-4 py-2 flex items-center gap-2">
                 <Calendar size={14} className="text-[#8B5CF6]" />

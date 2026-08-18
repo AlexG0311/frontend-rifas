@@ -41,6 +41,9 @@ export default function RifaCard({ rifa }: RifaCardProps) {
   const vendidos = numeros.filter((n) => n.estado === "VENDIDO").length;
   const total = rifa.numeroFinal - rifa.numeroInicial + 1;
   const porcentaje = total > 0 ? Math.round((vendidos / total) * 100) : 0;
+  
+  // Nueva condición: mostrar precio solo si la rifa tiene 100 números o menos
+  const mostrarPrecio = total <= 100;
 
   const esFinalizada = rifa.estado.nombre === "FINALIZADA";
   const esSorteada = rifa.estado.nombre === "SORTEADA";
@@ -134,12 +137,23 @@ export default function RifaCard({ rifa }: RifaCardProps) {
 
         {/* Footer: precio + botón */}
         <div className="flex items-center justify-between mt-2 pt-3 border-t border-[#2A1745]">
-          <div>
-            <p className="text-[10px] text-[#F5F3FF]/40 uppercase tracking-widest font-semibold">Precio</p>
-            <p className="text-xl font-black text-[#F5C542]">
-              ${rifa.precioNumero?.toLocaleString() ?? "—"}
-            </p>
-          </div>
+          {mostrarPrecio ? (
+            <div>
+              <p className="text-[10px] text-[#F5F3FF]/40 uppercase tracking-widest font-semibold">Precio</p>
+              <p className="text-xl font-black text-[#F5C542]">
+                ${rifa.precioNumero?.toLocaleString() ?? "—"}
+              </p>
+            </div>
+          ) : (
+            <div>
+              <p className="text-[10px] text-[#F5F3FF]/40 uppercase tracking-widest font-semibold">
+                {total} números disponibles
+              </p>
+              <p className="text-sm font-bold text-[#F5F3FF]/80">
+                ¡Gran rifa!
+              </p>
+            </div>
+          )}
 
           {esSorteada ? (
             <button className="bg-[#F5C542] hover:bg-[#F5C542]/90 text-[#0F071A] font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all">
