@@ -107,7 +107,6 @@ if (exitoso) {
             />
           ) : (
             <RifaCombos
-              rifa={rifa}
               total={total}
               combosLoading={combosLoading}
               combos={combos}

@@ -1,6 +1,4 @@
 import { Loader2, Shuffle, RefreshCw, Check } from "lucide-react";
-import type { ComboResponse } from "../../types/combo.type.ts";
-
 interface Combo {
   uuidPublico: string;
   cantidadNumeros: number;
@@ -12,9 +10,6 @@ interface Combo {
 }
 
 interface RifaCombosProps {
-  rifa: {
-    precioNumero: number;
-  };
   total: number;
   combosLoading: boolean;
   combos: Combo[];
@@ -28,7 +23,6 @@ interface RifaCombosProps {
 }
 
 export default function RifaCombos({
-  rifa,
   total,
   combosLoading,
   combos,
@@ -40,23 +34,7 @@ export default function RifaCombos({
   seleccionarCombo,
   limpiarSeleccion,
 }: RifaCombosProps) {
-  // Combo implícito de 1 número, usando el precio base de la rifa
-  const comboUnitario: ComboResponse = {
-    idCombo: "unitario",
-    uuidPublico: "unitario",
-    cantidadNumeros: 1,
-    precio: String(rifa.precioNumero),
-    etiqueta: "1 número",
-    descripcion: "Un número bendecido por la suerte",
-    destacado: false,
-    orden: -1,
-    activo: true,
-    fechaCreacion: "",
-    fechaActualizacion: null,
-  };
-
-  const combosParaMostrar = [comboUnitario, ...combos].sort((a, b) => a.orden - b.orden);
-
+  const combosParaMostrar = [...combos].sort((a, b) => a.orden - b.orden);
   // Si no hay seleccionados, ningún combo cuenta como "elegido" aunque haya un uuid residual
   const uuidActivo = seleccionados.length > 0 ? comboSeleccionadoUuid : null;
 
@@ -79,10 +57,7 @@ export default function RifaCombos({
             // El combo "unitario" nunca manda uuidCombo al backend (se envía como null/undefined),
             // así que se marca como seleccionado cuando no hay uuid activo pero sí hay números elegidos
             // y la cantidad coincide con 1.
-            const esSeleccionado =
-              combo.uuidPublico === "unitario"
-                ? uuidActivo === null && seleccionados.length === 1 && seleccionados.length === combo.cantidadNumeros
-                : combo.uuidPublico === uuidActivo;
+            const esSeleccionado = combo.uuidPublico === uuidActivo;
 
             return (
               <button
