@@ -18,7 +18,6 @@ export default function SignInForm() {
     e.preventDefault();
     // Handle form submission logic here
     const respuesta = await AuthService({ correo, password }); // el token lo tenemos que usar en httpOnly cookie, no en localStorage ni sessionStorage
-    console.log("Respuesta:", respuesta);
     setToken(respuesta);
   }
   

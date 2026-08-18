@@ -270,7 +270,7 @@ export default function RifaFormPage() {
             cantidad: Number(p.cantidad),
           }));
         }
-        console.log('Creando rifa con payload:', createData);
+       
         result = await crearRifa(createData as RifaCreatePayload);
       } else {
         const updatePayload: RifaUpdatePayload = {
@@ -293,8 +293,6 @@ export default function RifaFormPage() {
         } else if (productMode === 'manual') {
           updatePayload.productos = [];
         }
-
-        console.log('Editando rifa con payload:', updatePayload);
         result = await actualizarRifa(uuidPublico!, updatePayload);
       }
 

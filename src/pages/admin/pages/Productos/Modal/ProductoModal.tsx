@@ -43,13 +43,11 @@ export default function ProductoModal({
     try {
       if (modo === "crear") {
         await CrearProductos(producto);
-        console.log("Producto creado: ", producto);
       } else {
         if (!productos?.uuidPublico) {
           throw new Error("No se encontró el ID del producto para actualizar");
         }
         await UpdateProductos(productos.uuidPublico, producto);
-        console.log("Producto actualizado: ", producto);
       }
       
       // Cerrar modal después de éxito

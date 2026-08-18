@@ -10,7 +10,6 @@ export async function getRifas(): Promise<Rifa[]> {
   if (!res.ok) throw new Error("Error al obtener las rifas");
 
   const json: ApiResponse<Rifa[]> = await res.json();
-  console.log(json.data);
   return json.data;
 
 }
@@ -21,8 +20,6 @@ export async function getNumerosRifa(uuidRifa: string): Promise<NumeroRifa[]> {
   if (!res.ok) throw new Error("Error al obtener los números de la rifa");
   
   const json:ApiResponse<NumeroRifa[]> = await res.json()
-
-  console.log("Numeros: " , json.data)
   return json.data;
 }
                   

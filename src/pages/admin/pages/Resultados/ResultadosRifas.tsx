@@ -82,8 +82,6 @@ export default function ResultadosRifas() {
 
   const handleSelectRifa = (uuid: string) => {
     const selected = rifas.find((r) => r.uuidPublico === uuid);
-    console.log('Rifa seleccionada:', selected);
-
     const idLoteria = selected?.idLoteria ?? selected?.loteria?.idLoteria ?? 0;
 
     setSelectedRifaUuid(uuid);
